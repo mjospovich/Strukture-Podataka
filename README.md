@@ -2,5 +2,5 @@
 - Repository za predmet Strukture podataka
 
 ## Tim: GMAZ
-- @mjospovic
+- @mjospovich
 - @ldoric
