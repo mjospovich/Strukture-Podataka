@@ -1,6 +1,7 @@
 
 *.exe
 *.out
-*.lik
+*.ilk
 *.pdb
+*.obj
 
