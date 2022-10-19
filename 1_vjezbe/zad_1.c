@@ -49,15 +49,16 @@ int main(void)
   numOfStudents = countStudentsFromFile(fileName);
 
   //dynamically allocate memory based on result
-  studenti = (Student*)malloc(sizeof(Student) * numOfStudents);
-
-  //get info from file and store it in the structure
-  show = getStudentInfo(fileName, numOfStudents, studenti);
+  studenti = (Student*)calloc(numOfStudents, sizeof(Student));
 
   //printing num of students on screen
   if (numOfStudents >= 0)
+  {
     printf("Broj studenata u datoteci %s je %d\n", fileName, numOfStudents);
-
+    //get info from file and store it in the structure
+    show = getStudentInfo(fileName, numOfStudents, studenti);
+  }
+  
   //calling the printStudentInfo function if there was no error while getting the student data
   if (show == 0)
   {
