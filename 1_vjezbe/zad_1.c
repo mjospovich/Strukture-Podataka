@@ -11,6 +11,8 @@
 #define FILE_OPENING_ERROR (-1)
 #define GET_INFO_SUCCESS (0)
 #define MAX_NUM_POINTS (60)
+#define SUCCESS (0)
+#define MEMORY_ALLOC_FAIL (-1)
 
 
 struct _Student;
@@ -33,7 +35,7 @@ void printStudentInfo(int, Student*);
 int main(void)
 {
   //variables for get_student_info
-  Student *studenti;
+  Student *studenti = NULL;
   int i = 0;
   int show = -1;
 
@@ -48,13 +50,23 @@ int main(void)
   //get value from function thats reading the file
   numOfStudents = countStudentsFromFile(fileName);
 
-  //dynamically allocate memory based on result
-  studenti = (Student*)calloc(numOfStudents, sizeof(Student));
+  //check if number of students read from file is more then zero
+  //and only then proceed with mem alloc
+  if (numOfStudents > 0)
+  {
+    studenti = (Student*)calloc(numOfStudents, sizeof(Student));
+    //dynamically allocate memory based on result and check it
+    if (studenti == NULL)
+    {
+      printf("Failed while allocating the memory, exiting the program...\n");
+      return MEMORY_ALLOC_FAIL;
+    }
+  }
 
   //printing num of students on screen
   if (numOfStudents >= 0)
   {
-    printf("Broj studenata u datoteci %s je %d\n", fileName, numOfStudents);
+    printf("Broj studenata u datoteci '%s' je %d\n", fileName, numOfStudents);
     //get info from file and store it in the structure
     show = getStudentInfo(fileName, numOfStudents, studenti);
   }
@@ -69,7 +81,10 @@ int main(void)
     printf("Error when getting student info from the file!\n");
   }
 
-  return 0;
+  //free memory allocated
+  free(studenti);
+
+  return SUCCESS;
 }
 
 
@@ -89,7 +104,7 @@ int getStudentInfo(char* fileName, int numOfStudents, Student *studenti)
   //check if file has opened successfully (if not return error)
   if (fp == NULL)
   {
-    printf("The file %s didn't open!\r\n", fileName);
+    printf("The file '%s' didn't open!\r\n", fileName);
     return FILE_OPENING_ERROR;
   }
 
