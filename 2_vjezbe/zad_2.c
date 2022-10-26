@@ -9,6 +9,8 @@
 #define MEM_ALLOC_ERROR (-1)
 #define EMPTY_LIST_WARNING (-1)
 #define MEMBER_NOT_FOUND (-1)
+#define DEL_ERROR (-1)
+
 
 struct _Person;
 
@@ -23,11 +25,14 @@ typedef struct _Person{
 
 }Person;
 
+
 //function definitions
 int insert_end(Person** , char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
 int insert_front(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
 Person* find_next_surname(Person*, char[MAX_NAME_SIZE]);
 int print_list(Person*);
+//add function for printing only one surname person
+int delete_member(Person*, char[MAX_NAME_SIZE]);
 
 
 int main(void)
@@ -58,9 +63,13 @@ int main(void)
   Person* find = NULL;
   Person* wanted = NULL;
   
-  find = find_next_surname(head, "Fifa");
-  wanted = find->next;
-  printf("Found user: %s %s, age %d\n", wanted->name, wanted->surname, wanted->birthYear);
+  //find = find_next_surname(head, "Fifa");
+  //wanted = find->next;
+  //printf("Found user: %s %s, age %d\n", wanted->name, wanted->surname, wanted->birthYear);
+
+  delete_member(head, "Fifa");
+  printf("\n");
+  print_list(head);
 
   return SUCCESS;
 }
@@ -123,6 +132,34 @@ int insert_front(Person** head, char name[MAX_NAME_SIZE], char surname[MAX_NAME_
 
 
 //add comment
+int delete_member(Person* head, char surname[MAX_NAME_SIZE])
+{
+  //calling function to get previous member
+  Person* prev = find_next_surname(head, surname);
+  Person* temp = NULL;
+
+  //check if we can find right member
+  if (prev == NULL)
+  {
+    printf("Couldn't find the person with surname %s!\n", surname);
+    return DEL_ERROR;
+  }
+
+  //if we found the member proceed in deleting
+  temp = prev->next;
+  prev->next = (prev->next)->next;
+  temp->next = NULL;
+
+  //free memory from deatached member
+  free(temp);
+
+
+  return SUCCESS;
+}
+
+
+
+//add comment
 Person* find_next_surname(Person* head, char surname[MAX_NAME_SIZE])
 {
   Person* temp = NULL;
@@ -139,13 +176,14 @@ Person* find_next_surname(Person* head, char surname[MAX_NAME_SIZE])
     //finding the right surname and looping through
     if (strcmp((temp->next)->surname, surname) == 0){
       //if its the right one then break and return it
-      return temp;
+      return temp; //returning the one before one we wanted to find
     }
     temp = temp->next;
   }while(temp != NULL);
 
   temp = NULL;
 
+  //returning NULL if nothing is found
   return temp;
 }
 
