@@ -29,9 +29,8 @@ typedef struct _Person{
 //function definitions
 int insert_end(Person** , char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
 int insert_front(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
-Person* find_next_surname(Person*, char[MAX_NAME_SIZE]);
+Person* find_next_surname(Person*, char[MAX_NAME_SIZE]); //this function is used in print/delete member
 int print_list(Person*);
-//add function for printing only one surname person
 int delete_member(Person*, char[MAX_NAME_SIZE]);
 int print_member(Person*, char[MAX_NAME_SIZE]);
 int delete_list(Person*);
@@ -47,6 +46,8 @@ int main(void)
     printf("Memory hasn't allocated properly!\n");
     return MEM_ALLOC_ERROR;
   }
+
+  //initialization
   head->birthYear = 0;
   head->next = NULL;
   //strcpy(head->name, NULL);
@@ -143,6 +144,8 @@ int main(void)
 
   }while(choice != 0);
 
+
+  //freeing memory
   printf("Freeing memory...\n");
   int deleted = 0;
   deleted = delete_list(head);
@@ -155,10 +158,10 @@ int main(void)
 }
 
 
-//add comment
+//breaking the list apart and freeing memory from members 1 by 1
 int delete_list(Person* head)
 {
-  Person* temp = head;
+  Person* temp = head; 
 
   while(temp != NULL)
   {
@@ -171,7 +174,7 @@ int delete_list(Person* head)
 }
 
 
-//add comment
+//adding a member at the last place in the list
 int insert_end(Person** head, char name[MAX_NAME_SIZE],
               char surname[MAX_NAME_SIZE], int birthYear)
 {
@@ -202,7 +205,7 @@ int insert_end(Person** head, char name[MAX_NAME_SIZE],
 }
 
 
-//add comment
+//adding a member after head in the list
 int insert_front(Person** head, char name[MAX_NAME_SIZE], char surname[MAX_NAME_SIZE], int birthYear)
 {
   Person* new_person = (Person*)calloc(1, sizeof(Person));
@@ -227,7 +230,7 @@ int insert_front(Person** head, char name[MAX_NAME_SIZE], char surname[MAX_NAME_
 }
 
 
-//add comment
+//removing 1 member from the list
 int delete_member(Person* head, char surname[MAX_NAME_SIZE])
 {
   //calling function to get previous member
@@ -253,7 +256,7 @@ int delete_member(Person* head, char surname[MAX_NAME_SIZE])
   return SUCCESS;
 }
 
-//add comment
+//print given member info
 int print_member(Person* head, char surname[MAX_NAME_SIZE])
 {
   Person* wanted = find_next_surname(head, surname)->next;
@@ -268,11 +271,12 @@ int print_member(Person* head, char surname[MAX_NAME_SIZE])
   return SUCCESS;
 }
 
-//add comment
+//find the first member with given surname and return the member behind
 Person* find_next_surname(Person* head, char surname[MAX_NAME_SIZE])
 {
   Person* temp = NULL;
 
+  //check if list is empty
   if (head->next == NULL)
   {
     printf("List is empty, nothing to find!");
@@ -297,7 +301,7 @@ Person* find_next_surname(Person* head, char surname[MAX_NAME_SIZE])
 }
 
 
-//add comment
+//print all member info in the list
 int print_list(Person* head)
 {
   //chacking if list is empty before printing
