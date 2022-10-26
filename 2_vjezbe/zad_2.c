@@ -33,6 +33,8 @@ Person* find_next_surname(Person*, char[MAX_NAME_SIZE]);
 int print_list(Person*);
 //add function for printing only one surname person
 int delete_member(Person*, char[MAX_NAME_SIZE]);
+int print_member(Person*, char[MAX_NAME_SIZE]);
+int delete_list(Person*);
 
 
 int main(void)
@@ -50,26 +52,120 @@ int main(void)
   //strcpy(head->name, NULL);
   //strcpy(head->surname, NULL);
 
-  //
-  insert_end(&head, "Martin", "Joso", 19);
-  insert_end(&head, "Luka", "Fifa", 20);
-  print_list(head);
-  printf("\n\n");
-  insert_front(&head, "Andrija", "Hebrang", 74);
+  //variables for input
+  int choice = 0;
+  char name[MAX_NAME_SIZE] = {"/0"};
+  char surname[MAX_NAME_SIZE] = {"/0"};
+  int birthYear = 0;
+  int catch_msg = 0;
 
-  print_list(head);
+  //mainloop
+  do
+  {
+    choice = 0;
+    catch_msg = 0;
 
-  //finding member with surname 
-  Person* find = NULL;
-  Person* wanted = NULL;
-  
-  //find = find_next_surname(head, "Fifa");
-  //wanted = find->next;
-  //printf("Found user: %s %s, age %d\n", wanted->name, wanted->surname, wanted->birthYear);
+    printf("Choose: 0-EXIT | 1-INSERT_FRONT | 2-INSERT_BACK | 3-PRINT LIST | 4-PRINT MEMBER | 5-REMOVE MEMBER\n");
+    scanf("%d", &choice);
 
-  delete_member(head, "Fifa");
+    //asking needed input
+    if (choice == 1 || choice == 2)
+    {
+      printf("You need to enter info for new member!\n");
+      printf("NAME SURNAME BIRTHYEAR\n");
+      scanf(" %s %s %d", name, surname, &birthYear);
+    }
+
+    if (choice == 4 || choice == 5)
+    {
+      printf("You need to enter info for member you display/remove\n");
+      printf("SURNAME\n");
+      scanf(" %s", surname);
+    }
+
+    switch (choice)
+    {
+    case 1:
+      //insert_front
+      catch_msg = insert_front(&head, name, surname, birthYear);
+      if (catch_msg == SUCCESS){
+        printf("Inserted member successfully!\n");
+      }
+      else{
+        printf("Error has occured!\n");
+      }
+
+      break;
+    
+    case 2:
+      //insert_end
+      catch_msg = insert_end(&head, name, surname, birthYear);
+      if (catch_msg == SUCCESS){
+        printf("Inserted member successfully!\n");
+      }
+      else{
+        printf("Error has occured!\n");
+      }
+      break;
+    
+    case 3:
+      //print_list
+      catch_msg = print_list(head);
+      if (catch_msg != SUCCESS){
+        printf("Error has occured!\n");
+      }
+      break;
+    
+    case 4:
+      //print_member
+      catch_msg = print_member(head, surname);
+      if (catch_msg != SUCCESS){
+        printf("Error has occured!\n");
+      }
+      break;
+    
+    case 5:
+      //delete_member
+      catch_msg = delete_member(head, surname);
+      if (catch_msg == SUCCESS){
+        printf("Deleted member %s!\n", surname);
+      }
+      else{
+        printf("Error has occured!\n");
+      }
+      break;
+    
+    default:
+      break;
+    }
+
   printf("\n");
-  print_list(head);
+
+  }while(choice != 0);
+
+  printf("Freeing memory...\n");
+  int deleted = 0;
+  deleted = delete_list(head);
+  if (deleted == 0)
+    printf("Memory freed!\n");
+
+  printf("Exiting the program...\n");
+  
+  return SUCCESS;
+}
+
+
+//add comment
+int delete_list(Person* head)
+{
+  Person* temp = head;
+
+  while(temp != NULL)
+  {
+    temp = temp->next;
+    free(head);
+    head = temp;
+  }
 
   return SUCCESS;
 }
@@ -157,7 +253,20 @@ int delete_member(Person* head, char surname[MAX_NAME_SIZE])
   return SUCCESS;
 }
 
+//add comment
+int print_member(Person* head, char surname[MAX_NAME_SIZE])
+{
+  Person* wanted = find_next_surname(head, surname)->next;
+  
+  //check if we got the data needed
+  if (wanted == NULL)
+    return MEMBER_NOT_FOUND;
 
+  printf("Person's name is %s %s, they were born in %d!\n", wanted->name, wanted->surname, wanted->birthYear);
+
+
+  return SUCCESS;
+}
 
 //add comment
 Person* find_next_surname(Person* head, char surname[MAX_NAME_SIZE])
@@ -191,6 +300,7 @@ Person* find_next_surname(Person* head, char surname[MAX_NAME_SIZE])
 //add comment
 int print_list(Person* head)
 {
+  //chacking if list is empty before printing
   if (head->next == NULL)
   {
     printf("List is empty, nothing to print!");
