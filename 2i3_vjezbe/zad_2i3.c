@@ -67,90 +67,118 @@ int main(void)
         choice = 0;
         catch_msg = 0;
 
-        printf("Choose: 0-EXIT | 1-INSERT_FRONT | 2-INSERT_BACK | 3-PRINT LIST | 4-PRINT MEMBER | 5-REMOVE MEMBER\n");
+        printf("Choose:\n \t=> 0  EXIT\n\t=> 1  INSERT FROM FILE\n\t=> 2  INSERT FRONT\n\t=> 3  INSERT BACK\n\t=> 4  INSERT AFTER MEMBER\n\t=> 5  INSERT BEFORE MEMBER\n");
+        printf("\t=> 6  PRINT LIST\n\t=> 7  PRINT MEMBER\n\t=> 8  REMOVE MEMBER\n\t=> 9  SORT LIST\n\t=> 10 EXPORT TO FILE\n\n");
         scanf("%d", &choice);
 
         //asking needed input
-        if (choice == 1 || choice == 2 || choice == 6)
+        if (choice == 2 || choice == 3 || choice == 4 || choice ==5)
         {
             printf("You need to enter info for new member!\n");
             printf("NAME SURNAME BIRTHYEAR\n");
             scanf(" %s %s %d", name, surname, &birthYear);
         }
 
-        if (choice == 4 || choice == 5)
+        if (choice == 7 || choice == 8)
         {
             printf("You need to enter info for member you display/remove\n");
             printf("SURNAME\n");
             scanf(" %s", surname);
         }
 
+        if (choice == 1 || choice == 10)
+        {
+            printf("You need to enter file name\n");
+            printf("example: mycoolfile.txt\n");
+            //scanf(" %s", variable to store file name;
+        }
+
         switch (choice)
         {
-        case 1:
-            //insert_front
-            catch_msg = insert_front(&head, name, surname, birthYear);
-            if (catch_msg == SUCCESS) {
-                printf("Inserted member successfully!\n");
-            }
-            else {
-                printf("Error has occured!\n");
-            }
+            case 1:
+                //insert from file
+            
+                break;
 
-            break;
+            case 2:
+                //insert_front
+                catch_msg = insert_front(&head, name, surname, birthYear);
+                if (catch_msg == SUCCESS) {
+                    printf("Inserted member successfully!\n");
+                }
+                else {
+                    printf("Error has occured!\n");
+                }
 
-        case 2:
-            //insert_end
-            catch_msg = insert_end(&head, name, surname, birthYear);
-            if (catch_msg == SUCCESS) {
-                printf("Inserted member successfully!\n");
-            }
-            else {
-                printf("Error has occured!\n");
-            }
-            break;
+                break;
 
-        case 3:
-            //print_list
-            catch_msg = print_list(head);
-            if (catch_msg != SUCCESS) {
-                printf("Error has occured!\n");
-            }
-            break;
+            case 3:
+                //insert_end
+                catch_msg = insert_end(&head, name, surname, birthYear);
+                if (catch_msg == SUCCESS) {
+                    printf("Inserted member successfully!\n");
+                }
+                else {
+                    printf("Error has occured!\n");
+                }
+                break;
+            
+            case 4:
+                //insert_next
+                catch_msg = insert_next(&head, name, surname, birthYear);
+                if (catch_msg == SUCCESS) {
+                    printf("Inserted member successfully!\n");
+                }
+                else {
+                    printf("Error has occured!\n");
+                }
+                break;
 
-        case 4:
-            //print_member
-            catch_msg = print_member(head, surname);
-            if (catch_msg != SUCCESS) {
-                printf("Error has occured!\n");
-            }
-            break;
+            case 5:
+                //insert_before
+            
+                break;
 
-        case 5:
-            //delete_member
-            catch_msg = delete_member(head, surname);
-            if (catch_msg == SUCCESS) {
-                printf("Deleted member %s!\n", surname);
-            }
-            else {
-                printf("Error has occured!\n");
-            }
-            break;
+            case 6:
+                //print_list
+                catch_msg = print_list(head);
+                if (catch_msg != SUCCESS) {
+                    printf("Error has occured!\n");
+                }
+                break;
 
-        case 6:
-            //insert_next
-            catch_msg = insert_next(&head, name, surname, birthYear);
-            if (catch_msg == SUCCESS) {
-                printf("Inserted member successfully!\n");
-            }
-            else {
-                printf("Error has occured!\n");
-            }
-            break;
+            case 7:
+                //print_member
+                catch_msg = print_member(head, surname);
+                if (catch_msg != SUCCESS) {
+                    printf("Error has occured!\n");
+                }
+                break;
 
-        default:
-            break;
-        }
+            case 8:
+                //delete_member
+                catch_msg = delete_member(head, surname);
+                if (catch_msg == SUCCESS) {
+                    printf("Deleted member %s!\n", surname);
+                }
+                else {
+                    printf("Error has occured!\n");
+                }
+                break;
+            
+            case 9:
+                //sort list
+            
+                break;
+
+            case 10:
+                //export to file
+            
+                break;
+
+            default:
+                break;
+            }
 
         printf("\n");
 
