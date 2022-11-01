@@ -4,12 +4,16 @@
 #include <string.h>
 
 //defining constant values
+#define MAX_BUFFER_SIZE (1024)
+#define MAX_FILE_NAME (128)
 #define MAX_NAME_SIZE (128)
+#define FILE_OPENING_ERROR (-1)
 #define SUCCESS (0)
 #define MEM_ALLOC_ERROR (-1)
 #define EMPTY_LIST_WARNING (-1)
 #define MEMBER_NOT_FOUND (-1)
 #define DEL_ERROR (-1)
+#define MAX_LINE (128)
 
 
 struct _Person;
@@ -27,6 +31,7 @@ typedef struct _Person {
 
 
 //function definitions
+int insert_from_file(char*, Person*);
 int insert_end(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
 int insert_front(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
 Person* find_next_surname(Person*, char[MAX_NAME_SIZE]); //this function is used in print/delete member
@@ -39,6 +44,13 @@ int insert_next(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
 
 int main(void)
 {
+    //variables for input
+    int choice = 0;
+    char name[MAX_NAME_SIZE] = { "/0" };
+    char surname[MAX_NAME_SIZE] = { "/0" };
+    int birthYear = 0;
+    int catch_msg = 0;
+    char fileName[MAX_FILE_NAME] = { 0 };
     //declaring head and setting everything to NULL
     Person* head = (Person*)calloc(1, sizeof(Person));
     //checking if memory has allocated or not
@@ -54,12 +66,6 @@ int main(void)
     //strcpy(head->name, NULL);
     //strcpy(head->surname, NULL);
 
-    //variables for input
-    int choice = 0;
-    char name[MAX_NAME_SIZE] = { "/0" };
-    char surname[MAX_NAME_SIZE] = { "/0" };
-    int birthYear = 0;
-    int catch_msg = 0;
 
     //mainloop
     do
@@ -88,16 +94,22 @@ int main(void)
 
         if (choice == 1 || choice == 10)
         {
-            printf("You need to enter file name\n");
-            printf("example: mycoolfile.txt\n");
-            //scanf(" %s", variable to store file name;
+           printf("Insert filename > ");
+           scanf(" %s", fileName);
         }
 
         switch (choice)
         {
             case 1:
                 //insert from file
-            
+                catch_msg = insert_from_file(fileName, head);
+                if (catch_msg == SUCCESS) {
+                    printf("Inserted list successfully!\n");
+                }
+                else {
+                    printf("Error has occured!\n");
+                }
+
                 break;
 
             case 2:
@@ -212,6 +224,44 @@ int delete_list(Person* head)
 
     return SUCCESS;
 }
+
+//inserting list from a file
+int insert_from_file(char* fileName, Person *head)
+{
+    char name[MAX_NAME_SIZE] = { "/0" };
+    char surname[MAX_NAME_SIZE] = { "/0" };
+    int birthYear = 0;
+    //opening the text file and setting it to a variable
+    FILE *fp = NULL;
+    fp = fopen(fileName, "r");
+
+    char buffer[MAX_LINE] = { 0 };
+
+  
+    //checking if the file opened correctly, if not returning error
+    if (fp == NULL)
+    {
+        printf("The file %s didn't open!\r\n", fileName);
+        return FILE_OPENING_ERROR;
+    }
+  
+    //going through the file and counting the number of students
+    while(!feof(fp))
+    {
+        fgets(buffer, MAX_BUFFER_SIZE, fp);
+        sscanf(buffer, "%s %s %d", name, surname, &birthYear);
+        //provjerit jel ima praznih redova
+        insert_end(&head, name, surname, birthYear);
+    }
+
+    //closing the text file
+    fclose(fp);
+
+    //returning the number of students in the file
+    return SUCCESS;
+
+}
+
 
 //adding a member after another member in the list
 int insert_next(Person* head, char name[MAX_NAME_SIZE] , char surname[MAX_NAME_SIZE], int birthYear)
