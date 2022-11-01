@@ -291,14 +291,16 @@ int bubble_sort(Person* head)
 //breaking the list apart and freeing memory from members 1 by 1
 int delete_list(Person* head)
 {
-    Person* temp = head;
+    Person* temp = head->next;
 
-    while (temp != NULL)
+    do
     {
-        temp = temp->next;
-        free(head);
-        head = temp;
-    }
+        delete_member(head, temp->surname);
+        temp = head->next;
+      
+    }while (temp != NULL);
+
+    free(head);
 
     return SUCCESS;
 }
@@ -571,7 +573,7 @@ int delete_member(Person* head, char surname[MAX_NAME_SIZE])
 
     //if we found the member proceed in deleting
     temp = prev->next;
-    prev->next = (prev->next)->next; //what if this is equal to NULL (if the member we want to delete is last)
+    prev->next = (prev->next)->next;
     temp->next = NULL;
 
     //free memory from deatached member
