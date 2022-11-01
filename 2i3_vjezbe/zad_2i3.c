@@ -32,6 +32,7 @@ typedef struct _Person {
 
 //function definitions
 int insert_from_file(char*, Person*);
+int export_to_file(char*, Person*);
 int insert_end(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
 int insert_front(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
 Person* find_next_surname(Person*, char[MAX_NAME_SIZE]); //this function is used in print/delete member
@@ -51,6 +52,7 @@ int main(void)
     int birthYear = 0;
     int catch_msg = 0;
     char fileName[MAX_FILE_NAME] = { 0 };
+
     //declaring head and setting everything to NULL
     Person* head = (Person*)calloc(1, sizeof(Person));
     //checking if memory has allocated or not
@@ -63,8 +65,8 @@ int main(void)
     //initialization
     head->birthYear = 0;
     head->next = NULL;
-    //strcpy(head->name, NULL);
-    //strcpy(head->surname, NULL);
+    strcpy(head->name, "");
+    strcpy(head->surname, "");
 
 
     //mainloop
@@ -185,7 +187,14 @@ int main(void)
 
             case 10:
                 //export to file
-            
+                catch_msg = export_to_file(fileName, head);
+                if (catch_msg == SUCCESS) {
+                    printf("Inserted list successfully!\n");
+                }
+                else {
+                    printf("Error has occured!\n");
+                }
+
                 break;
 
             default:
@@ -225,8 +234,9 @@ int delete_list(Person* head)
     return SUCCESS;
 }
 
+
 //inserting list from a file
-int insert_from_file(char* fileName, Person *head)
+int insert_from_file(char* fileName, Person* head)
 {
     char name[MAX_NAME_SIZE] = { "/0" };
     char surname[MAX_NAME_SIZE] = { "/0" };
@@ -245,26 +255,65 @@ int insert_from_file(char* fileName, Person *head)
         return FILE_OPENING_ERROR;
     }
   
-    //going through the file and counting the number of students
+    //going through the file and finding info about members
     while(!feof(fp))
     {
         fgets(buffer, MAX_BUFFER_SIZE, fp);
         sscanf(buffer, "%s %s %d", name, surname, &birthYear);
-        //provjerit jel ima praznih redova
-        insert_end(&head, name, surname, birthYear);
+        //skip empty row
+        if (strcmp("\n", buffer) != 0)
+        {
+            insert_end(&head, name, surname, birthYear);
+        }
     }
 
     //closing the text file
     fclose(fp);
 
-    //returning the number of students in the file
     return SUCCESS;
+}
 
+
+//export list to a file
+int export_to_file(char* fileName, Person* head)
+{
+    FILE *fp = NULL;
+    fp = fopen(fileName, "w");
+  
+    //checking if the file opened correctly, if not returning error
+    if (fp == NULL)
+    {
+        printf("The file %s didn't open!\r\n", fileName);
+        return FILE_OPENING_ERROR;
+    }
+  
+    //chacking if list is empty before printing
+    if (head->next == NULL)
+    {
+        printf("List is empty, nothing to print!");
+        return EMPTY_LIST_WARNING;
+    }
+
+    //temp variable on stack for looping through the list
+    Person* temp = head->next;
+
+    do {
+        //printing values from the list
+        fprintf(fp,"Name: %s, Surname: %s, Birth Year: %d\n",
+            temp->name, temp->surname, temp->birthYear);
+
+        temp = temp->next;
+    } while (temp != NULL);
+
+    //closing the text file
+    fclose(fp);
+
+    return SUCCESS;
 }
 
 
 //adding a member after another member in the list
-int insert_next(Person* head, char name[MAX_NAME_SIZE] , char surname[MAX_NAME_SIZE], int birthYear)
+int insert_next(Person** head, char name[MAX_NAME_SIZE] , char surname[MAX_NAME_SIZE], int birthYear)
 {
     char surname_prev[MAX_NAME_SIZE] = "";
     printf("Enter surname of the member you want to insert after:\n");
@@ -383,6 +432,7 @@ int delete_member(Person* head, char surname[MAX_NAME_SIZE])
     return SUCCESS;
 }
 
+
 //print given member info
 int print_member(Person* head, char surname[MAX_NAME_SIZE])
 {
@@ -397,6 +447,7 @@ int print_member(Person* head, char surname[MAX_NAME_SIZE])
 
     return SUCCESS;
 }
+
 
 //find the first member with given surname and return the member behind
 Person* find_next_surname(Person* head, char surname[MAX_NAME_SIZE])
@@ -443,7 +494,7 @@ int print_list(Person* head)
 
     do {
         //printing values from the list
-        printf("Name: %s, Surname: %s, Birth Year: %d\n",
+        printf("\tName: %s, Surname: %s, Birth Year: %d\n",
             temp->name, temp->surname, temp->birthYear);
 
         temp = temp->next;
