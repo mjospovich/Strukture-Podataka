@@ -14,6 +14,7 @@
 #define MEMBER_NOT_FOUND (-1)
 #define DEL_ERROR (-1)
 #define MAX_LINE (128)
+#define INSERT_ERROR (-1)
 
 
 struct _Person;
@@ -41,6 +42,9 @@ int delete_member(Person*, char[MAX_NAME_SIZE]);
 int print_member(Person*, char[MAX_NAME_SIZE]);
 int delete_list(Person*);
 int insert_next(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
+int insert_before(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
+int insert_before_no_inpt(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int, char[MAX_NAME_SIZE]);
+int bubble_sort(Person*);
 
 
 int main(void)
@@ -150,7 +154,13 @@ int main(void)
 
             case 5:
                 //insert_before
-            
+                catch_msg = insert_before(&head, name, surname, birthYear);
+                if (catch_msg == SUCCESS) {
+                    printf("Inserted member successfully!\n");
+                }
+                else {
+                    printf("Error has occured!\n");
+                }
                 break;
 
             case 6:
@@ -182,6 +192,13 @@ int main(void)
             
             case 9:
                 //sort list
+                catch_msg = bubble_sort(head);
+                if (catch_msg == SUCCESS) {
+                    printf("Sorted the list!\n");
+                }
+                else {
+                    printf("Error has occured!\n");
+                }
             
                 break;
 
@@ -216,6 +233,58 @@ int main(void)
     printf("Exiting the program...\n");
 
     return SUCCESS;
+}
+
+//bubble sort for linked list
+int bubble_sort(Person* head)
+{
+    //checking if list is empty
+    if (head->next == NULL)
+    {
+        printf("List is empty!\n");
+        return EMPTY_LIST_WARNING;
+    }
+
+    //variables for sorting
+    Person* current = head->next;
+    Person* next = NULL;
+    Person* temp = NULL;
+    int swapped = 0;
+    int insertion = 0;
+    int counter = 0;
+    //sorting
+    do
+    {
+        swapped = 0;
+        current = head->next;
+        while (current->next != NULL)
+        {
+            next = current->next;
+            if (strcmp(current->surname, next->surname) > 0)
+            {
+                //swapping
+                temp = next;
+                delete_member(head, next->surname);
+                insertion = insert_before_no_inpt(&head, temp->name, temp->surname, temp->birthYear, current->surname);
+                
+                //testing if insertion was successful
+                if (insertion != SUCCESS)
+                {
+                    printf("Error has occured!\n");
+                    return INSERT_ERROR;
+                }
+                swapped = 1;
+            }
+            current = current->next;
+        }
+        if (counter >= 2)
+            print_list(head);
+        counter++;
+        
+    } while (swapped == 1);
+
+    return SUCCESS;
+
 }
 
 
@@ -319,7 +388,10 @@ int insert_next(Person** head, char name[MAX_NAME_SIZE] , char surname[MAX_NAME_
     printf("Enter surname of the member you want to insert after:\n");
     scanf("%s", surname_prev);
 
+    //new member
     Person* new_person = (Person*)calloc(1, sizeof(Person));
+    new_person->next = NULL;
+
     //checking if memory has allocated or not
     if (new_person == NULL)
     {
@@ -327,14 +399,16 @@ int insert_next(Person** head, char name[MAX_NAME_SIZE] , char surname[MAX_NAME_
         return MEM_ALLOC_ERROR;
     }
 
-
-    Person* prev_prev = find_next_surname(head, surname_prev);
+    //getting the member who is before the one after whoom we want to insert
+    Person* prev_prev = find_next_surname(*head, surname_prev);
     if (prev_prev == NULL)
     {
         return MEMBER_NOT_FOUND;
     }
 
+    //the member after whoom we want to insert
     Person* prev = prev_prev->next;
+    //the member after the one we insert
     Person* temp = prev->next;
 
     prev->next = new_person;
@@ -349,6 +423,81 @@ int insert_next(Person** head, char name[MAX_NAME_SIZE] , char surname[MAX_NAME_
     return SUCCESS;
 }
 
+
+//adding a member before another member in the list
+int insert_before(Person** head, char name[MAX_NAME_SIZE] , char surname[MAX_NAME_SIZE], int birthYear)
+{
+    //member before whoom we will insert new one
+    char surname_after[MAX_NAME_SIZE] = "";
+
+    printf("Enter surname of the member you want to insert before:\n");
+    scanf("%s", surname_after);
+
+    //new member
+    Person* new_person = (Person*)calloc(1, sizeof(Person));
+    new_person->next = NULL;
+
+    //checking if memory has allocated or not
+    if (new_person == NULL)
+    {
+        printf("Memory hasn't allocated properly!\n");
+        return MEM_ALLOC_ERROR;
+    }
+
+    //getting the member who is before the one after whoom we want to insert
+    Person* prev = find_next_surname(*head, surname_after);
+    if (prev == NULL)
+    {
+        return MEMBER_NOT_FOUND;
+    }
+
+    //new member now points to the one after and prev points to new member
+    new_person->next = prev->next;
+    prev->next = new_person;
+    
+    //assigning values to the new member
+    strcpy(new_person->name, name);
+    strcpy(new_person->surname, surname);
+    new_person->birthYear = birthYear;
+
+
+    return SUCCESS;
+}
+
+
+//adding a member before another member in the list for bubble sort
+int insert_before_no_inpt(Person** head, char name[MAX_NAME_SIZE] , char surname[MAX_NAME_SIZE], int birthYear, char surname_after[MAX_NAME_SIZE])
+{
+    //new member
+    Person* new_person = (Person*)calloc(1, sizeof(Person));
+    new_person->next = NULL;
+
+    //checking if memory has allocated or not
+    if (new_person == NULL)
+    {
+        printf("Memory hasn't allocated properly!\n");
+        return MEM_ALLOC_ERROR;
+    }
+
+    //getting the member who is before the one after whoom we want to insert
+    Person* prev = find_next_surname(*head, surname_after);
+    if (prev == NULL)
+    {
+        return MEMBER_NOT_FOUND;
+    }
+
+    //new member now points to the one after and prev points to new member
+    new_person->next = prev->next;
+    prev->next = new_person;
+    
+    //assigning values to the new member
+    strcpy(new_person->name, name);
+    strcpy(new_person->surname, surname);
+    new_person->birthYear = birthYear;
+
+
+    return SUCCESS;
+}
 
 //adding a member at the last place in the list
 int insert_end(Person** head, char name[MAX_NAME_SIZE],
@@ -422,7 +571,7 @@ int delete_member(Person* head, char surname[MAX_NAME_SIZE])
 
     //if we found the member proceed in deleting
     temp = prev->next;
-    prev->next = (prev->next)->next;
+    prev->next = (prev->next)->next; //what if this is equal to NULL (if the member we want to delete is last)
     temp->next = NULL;
 
     //free memory from deatached member
