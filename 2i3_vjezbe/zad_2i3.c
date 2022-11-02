@@ -45,6 +45,9 @@ int insert_next(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
 int insert_before(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
 int insert_before_no_inpt(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int, char[MAX_NAME_SIZE]);
 int bubble_sort(Person*);
+int print_menu();
+int freeing_memory(Person*);
+Person* create_person();
 
 
 int main(void)
@@ -57,21 +60,7 @@ int main(void)
     int catch_msg = 0;
     char fileName[MAX_FILE_NAME] = { 0 };
 
-    //declaring head and setting everything to NULL
-    Person* head = (Person*)calloc(1, sizeof(Person));
-    //checking if memory has allocated or not
-    if (head == NULL)
-    {
-        printf("Memory hasn't allocated properly!\n");
-        return MEM_ALLOC_ERROR;
-    }
-
-    //initialization
-    head->birthYear = 0;
-    head->next = NULL;
-    strcpy(head->name, "");
-    strcpy(head->surname, "");
-
+    Person* head = create_person();
 
     //mainloop
     do
@@ -79,8 +68,7 @@ int main(void)
         choice = 0;
         catch_msg = 0;
 
-        printf("Choose:\n \t=> 0  EXIT\n\t=> 1  INSERT FROM FILE\n\t=> 2  INSERT FRONT\n\t=> 3  INSERT BACK\n\t=> 4  INSERT AFTER MEMBER\n\t=> 5  INSERT BEFORE MEMBER\n");
-        printf("\t=> 6  PRINT LIST\n\t=> 7  PRINT MEMBER\n\t=> 8  REMOVE MEMBER\n\t=> 9  SORT LIST\n\t=> 10 EXPORT TO FILE\n\n");
+        print_menu();
         scanf("%d", &choice);
 
         //asking needed input
@@ -222,8 +210,34 @@ int main(void)
 
     } while (choice != 0);
 
+    freeing_memory(head);
 
-    //freeing memory
+    return SUCCESS;
+}
+
+Person* create_person()
+{
+     //declaring head and setting everything to NULL
+    Person* head = (Person*)calloc(1, sizeof(Person));
+    //checking if memory has allocated or not
+    if (head == NULL)
+    {
+        printf("Memory hasn't allocated properly!\n");
+        return MEM_ALLOC_ERROR;
+    }
+
+    //initialization
+    head->birthYear = 0;
+    head->next = NULL;
+    strcpy(head->name, "");
+    strcpy(head->surname, "");
+
+    return head;
+}
+
+//freeing memory at the end
+int freeing_memory(Person* head)
+{
     printf("Freeing memory...\n");
     int deleted = 0;
     deleted = delete_list(head);
@@ -232,6 +246,14 @@ int main(void)
 
     printf("Exiting the program...\n");
 
+    return SUCCESS;
+}
+
+//printing the main menu
+int print_menu()
+{
+    printf("Choose:\n \t=> 0  EXIT\n\t=> 1  INSERT FROM FILE\n\t=> 2  INSERT FRONT\n\t=> 3  INSERT BACK\n\t=> 4  INSERT AFTER MEMBER\n\t=> 5  INSERT BEFORE MEMBER\n");
+    printf("\t=> 6  PRINT LIST\n\t=> 7  PRINT MEMBER\n\t=> 8  REMOVE MEMBER\n\t=> 9  SORT LIST\n\t=> 10 EXPORT TO FILE\n\n");
     return SUCCESS;
 }
 
@@ -464,40 +486,6 @@ int insert_before(Person** head, char name[MAX_NAME_SIZE] , char surname[MAX_NAM
     return SUCCESS;
 }
 
-
-//adding a member before another member in the list for bubble sort
-int insert_before_no_inpt(Person** head, char name[MAX_NAME_SIZE] , char surname[MAX_NAME_SIZE], int birthYear, char surname_after[MAX_NAME_SIZE])
-{
-    //new member
-    Person* new_person = (Person*)calloc(1, sizeof(Person));
-    new_person->next = NULL;
-
-    //checking if memory has allocated or not
-    if (new_person == NULL)
-    {
-        printf("Memory hasn't allocated properly!\n");
-        return MEM_ALLOC_ERROR;
-    }
-
-    //getting the member who is before the one after whoom we want to insert
-    Person* prev = find_next_surname(*head, surname_after);
-    if (prev == NULL)
-    {
-        return MEMBER_NOT_FOUND;
-    }
-
-    //new member now points to the one after and prev points to new member
-    new_person->next = prev->next;
-    prev->next = new_person;
-    
-    //assigning values to the new member
-    strcpy(new_person->name, name);
-    strcpy(new_person->surname, surname);
-    new_person->birthYear = birthYear;
-
-
-    return SUCCESS;
-}
 
 //adding a member at the last place in the list
 int insert_end(Person** head, char name[MAX_NAME_SIZE],
