@@ -238,6 +238,9 @@ int main(void)
 //bubble sort for linked list
 int bubble_sort(Person* head)
 {
+    //variables for swapping
+    Person *p = NULL, *end = NULL, *q = NULL, *temp = NULL, *r = temp;
+    
     //checking if list is empty
     if (head->next == NULL)
     {
@@ -245,43 +248,37 @@ int bubble_sort(Person* head)
         return EMPTY_LIST_WARNING;
     }
 
-    //variables for sorting
-    Person* current = head->next;
-    Person* next = NULL;
-    Person* temp = NULL;
-    int swapped = 0;
-    int insertion = 0;
-    int counter = 0;
-    //sorting
-    do
+    for (end = NULL; end != head->next; end = p)
     {
-        swapped = 0;
-        current = head->next;
-        while (current->next != NULL)
+        for (p = r = head; p->next != end; r = p, p = p->next)
         {
-            next = current->next;
-            if (strcmp(current->surname, next->surname) > 0)
+            //setting it to member after p for comparing
+            q = p->next;
+
+            //comparing surnames
+            if(strcmp(p->surname, q->surname) > 0)
             {
-                //swapping
-                temp = next;
-                delete_member(head, next->surname);
-                insertion = insert_before_no_inpt(&head, temp->name, temp->surname, temp->birthYear, current->surname);
-                
-                //testing if insertion was successful
-                if (insertion != SUCCESS)
-                {
-                    printf("Error has occured!\n");
-                    return INSERT_ERROR;
-                }
-                swapped = 1;
+               //swapping members
+               p->next = q->next;
+               q->next = p;
+
+               if (p != head){
+                r->next = q;
+               }
+               else{
+                head = q;
+               }
+
+               temp = p;
+               p = q;
+               q = temp;
             }
-            current = current->next;
+
         }
-        if (counter >= 2)
-            print_list(head);
-        counter++;
-        
-    } while (swapped == 1);
+
+    }
+
+    
 
     return SUCCESS;
 
@@ -309,8 +306,8 @@ int delete_list(Person* head)
 //inserting list from a file
 int insert_from_file(char* fileName, Person* head)
 {
-    char name[MAX_NAME_SIZE] = { "/0" };
-    char surname[MAX_NAME_SIZE] = { "/0" };
+    char name[MAX_NAME_SIZE] = { "\0" };
+    char surname[MAX_NAME_SIZE] = { "\0" };
     int birthYear = 0;
     //opening the text file and setting it to a variable
     FILE *fp = NULL;
@@ -330,10 +327,11 @@ int insert_from_file(char* fileName, Person* head)
     while(!feof(fp))
     {
         fgets(buffer, MAX_BUFFER_SIZE, fp);
-        sscanf(buffer, "%s %s %d", name, surname, &birthYear);
+
         //skip empty row
-        if (strcmp("\n", buffer) != 0)
+        if ((strcmp("\n", buffer) != 0))
         {
+            sscanf(buffer, "%s %s %d", name, surname, &birthYear);
             insert_end(&head, name, surname, birthYear);
         }
     }
