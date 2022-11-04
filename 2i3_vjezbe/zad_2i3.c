@@ -44,7 +44,6 @@ int print_member(Person*, char*);
 int delete_list(Person*);
 int insert_next(Person**, char*, char*, int);
 int insert_before(Person**, char*, char*, int);
-int insert_before_no_inpt(Person**, char*, char*, int, char*);
 int bubble_sort(Person*);
 int print_menu();
 int freeing_memory(Person*);
