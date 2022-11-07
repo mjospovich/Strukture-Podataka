@@ -14,6 +14,7 @@
 #define MAX_FILE_NAME (128)
 #define MAX_LINE (128)
 #define MAX_POLYNOMIAL (16)
+#define INSERTION_ERROR (-1)
 
 
 struct _Polynomial;
@@ -32,13 +33,19 @@ typedef struct _Polynomial{
 //function definitions
 int insert_from_file(char*, Polynomial**);
 int insert_end(Polynomial** head, int, int);
+int insert_sorted(Polynomial** head, int, int);
 int print_list(Polynomial* head);
+void test_array(Polynomial** head_arr);
+int insert_before(Polynomial** head, int, int, int);
+Polynomial* find_exp(Polynomial*, int);
+
 
 int main(void)
 {
     Polynomial** head_arr;
     char fileName[MAX_FILE_NAME] = {"\0"};
     int check_msg = 0;
+    int i = 0;
     
     //allocating an array of heads
     head_arr = (Polynomial**)calloc(MAX_POLYNOMIAL, sizeof(Polynomial*));
@@ -55,10 +62,6 @@ int main(void)
     check_msg = insert_from_file(fileName, head_arr);
 
 
-
-
-
-
     return SUCCESS;
 }
 
@@ -68,7 +71,7 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
     int exp = 0;
     int count_read = 0;
     int steps = 0;
-    int i = 0;
+    int i = 0, j = 0;
     int buffer_len;
     Polynomial *head = NULL, *temp_linked;
 
@@ -101,6 +104,7 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
         //skip empty row
         if ((strcmp("\n", buffer) != 0))
         {
+            head = NULL;
             i = i + 1;
             *(head_arr + i) = (Polynomial*)calloc(1, sizeof(Polynomial));
              head = *(head_arr + i);
@@ -111,7 +115,8 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
                 steps = steps + count_read;
 
                 //storing values read from file
-                insert_end(&head, multiplier, exp);
+                insert_sorted(&head, multiplier, exp);
+                //insert_end(&head, multiplier, exp);
                 
                 //printf("Multiplier: %d Exp: %d CountRead: %d I: %d\n",multiplier, exp, count_read, i);
                 if(steps > buffer_len){
@@ -125,14 +130,17 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
 
             }while(steps != buffer_len);
             //funkcija provjera
+
+            //adding 
             *(head_arr + i) = head;
         }
-        //head arr prazan gg triba vidit to mozda pokusat stavit da head_arr drzi adrese od headova a ne bas headove
-        for(i = 0; i < 2; i++){
-            print_list(*(head_arr+i));
-            printf("....\n");
-        }
+        
     }
+    //head arr prazan gg triba vidit to mozda pokusat stavit da head_arr drzi adrese od headova a ne bas headove
+    
+    //test if its stored corretly
+    test_array(head_arr);
+
 
     //closing the text file
     fclose(fp);
@@ -158,6 +166,7 @@ int insert_end(Polynomial** head, int multiplier, int exp)
 
     //assigning values to the new member
     new_member->multiplier = multiplier;
+    new_member->exp = exp;
     
     //looping until we reach the previuos last member
     while (current->next != NULL) 
@@ -193,3 +202,169 @@ int print_list(Polynomial* head)
 
     return SUCCESS;
 }
+
+
+void test_array(Polynomial** head_arr)
+{
+    int i = 0;
+
+    for (i = 1; i<=6; i++){
+        if(*(head_arr + i) == NULL){
+            printf("Prazno\n");
+            continue;
+        }
+        print_list(*(head_arr + i));
+        printf("next...\n");
+    }
+
+}
+
+int insert_sorted(Polynomial** head, int multiplier, int exp)
+{
+    Polynomial* current = *head;
+    int chk_msg = 0;
+
+    if (current->next == NULL)
+    {
+        insert_front(head, multiplier, exp);
+        return SUCCESS;
+    }
+
+    //sort it bro
+    do
+    {
+        //moving the current member to the next one for testing
+        current = current->next;
+
+        //checking values
+        if(exp > current->exp){
+            chk_msg = insert_before(head, multiplier, exp, current->exp);
+            if (chk_msg == SUCCESS){
+                return SUCCESS;
+            }
+            else{
+                return INSERTION_ERROR;
+            }
+        }
+
+        else if (exp == current->exp){
+            current->multiplier = current->multiplier + multiplier;
+            return SUCCESS;
+        }
+
+        else{
+            continue;
+        }
+
+    }while(current->next != NULL);
+
+    //if we didn't insert before we insert now at the end
+    chk_msg = insert_end(head, multiplier, exp);
+    if (chk_msg == SUCCESS){
+                return SUCCESS;
+            }
+            else{
+                return INSERTION_ERROR;
+            }
+
+
+    return SUCCESS;
+}
+
+
+int insert_front(Polynomial** head, int multiplier, int exp)
+{
+    Polynomial* new_member = (Polynomial*)calloc(1, sizeof(Polynomial));
+    //checking if memory has allocated or not
+    if (new_member == NULL)
+    {
+        printf("Memory hasn't allocated properly!\n");
+        return MEM_ALLOC_ERROR;
+    }
+    //new_member now points to the member head used to point
+    new_member->next = (*head)->next;
+
+    //head now point to the new member
+    (*head)->next = new_member;
+
+    //assigning values to the new member
+    new_member->multiplier = multiplier;
+    new_member->exp = exp;
+
+    return SUCCESS;
+}
+
+
+int insert_before(Polynomial** head, int multiplier, int exp, int exp_after)
+{
+    //new member
+    Polynomial* new_member = (Polynomial*)calloc(1, sizeof(Polynomial));
+    //checking if memory has allocated or not
+    if (new_member == NULL)
+    {
+        printf("Memory hasn't allocated properly!\n");
+        return MEM_ALLOC_ERROR;
+    }
+
+    //getting the member who is before the one after whoom we want to insert
+    Polynomial* prev = find_exp(*head, exp_after);
+    if (prev == NULL)
+    {
+        return MEMBER_NOT_FOUND;
+    }
+
+    //new member now points to the one after and prev points to new member
+    new_member->next = prev->next;
+    prev->next = new_member;
+    
+    //assigning values to the new member
+    new_member->multiplier = multiplier;
+    new_member->exp = exp;
+
+
+    return SUCCESS;
+}
+
+
+//find the first member with given surname and return the member behind
+Polynomial* find_exp(Polynomial* head, int exp)
+{
+    Polynomial* temp = NULL;
+
+    //check if list is empty
+    if (head->next == NULL)
+    {
+        printf("List is empty, nothing to find!");
+        return temp;
+    }
+
+    temp = head;
+
+    do {
+        //finding the right surname and looping through
+        if (temp->next->exp == exp) {
+            //if its the right one then break and return it
+            return temp; //returning the one before one we wanted to find
+        }
+        temp = temp->next;
+    } while (temp != NULL);
+
+    temp = NULL;
+
+    //returning NULL if nothing is found
+    return temp;
+}
+
+
+/*toDO
+-dodaj funkciju provjera koja provjerava je li polinom skroz skracen ako nije
+-skracuje ga do kraja (ako bude nula ne dodaje ga u array)
+-ako je skracen in nije nula vreaca 0 i mozemo ga dodat u array
+-ako ne preskacemo i onda novi polinom ce ic na njegovo misto
+
+-zbrajanje polinoma
+-mnozenje polinoma
+
+-dosta provjera i ciscenja koda
+
+*/
