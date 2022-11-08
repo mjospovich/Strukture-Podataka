@@ -15,6 +15,11 @@
 #define MAX_LINE (128)
 #define MAX_POLYNOMIAL (16)
 #define INSERTION_ERROR (-1)
+#define EMPTY_POLYNOMIAL (-1)
+#define END_OF_LIST (0)
+#define NOT_END_OF_LIST (1)
+#define MAX_EXPONENT (32)
+#define SUM_ERROR (-1)
 
 
 struct _Polynomial;
@@ -38,19 +43,34 @@ int print_list(Polynomial* head);
 void test_array(Polynomial** head_arr);
 int insert_before(Polynomial** head, int, int, int);
 Polynomial* find_exp(Polynomial*, int);
+int check_polynominal(Polynomial* head);
+int delete_member(Polynomial* head, int exp);
+int delete_list(Polynomial* head);
+Polynomial* sum_polynomial(Polynomial** head_arr);
+int count_polynomial(Polynomial** head_arr);
+int count_members(Polynomial*);
+Polynomial* multiply_two_poly(Polynomial*, Polynomial*);
+void copy_arr_poly(Polynomial**, Polynomial**);
 
 
 int main(void)
 {
-    Polynomial** head_arr;
+    Polynomial** sum_head_arr;
+    Polynomial** multi_head_arr;
+    Polynomial* result_sum;
+    Polynomial* result_multi;
     char fileName[MAX_FILE_NAME] = {"\0"};
     int check_msg = 0;
     int i = 0;
     
     //allocating an array of heads
-    head_arr = (Polynomial**)calloc(MAX_POLYNOMIAL, sizeof(Polynomial*));
+    sum_head_arr = (Polynomial**)calloc(MAX_POLYNOMIAL, sizeof(Polynomial*));
+    multi_head_arr = (Polynomial**)calloc(MAX_POLYNOMIAL, sizeof(Polynomial*));
+    result_sum = (Polynomial*)calloc(1, sizeof(Polynomial));
+    result_multi = (Polynomial*)calloc(1, sizeof(Polynomial));
+
     //checking if memory has allocated correctly
-    if (head_arr == NULL)
+    if (multi_head_arr == NULL ||sum_head_arr == NULL || result_sum == NULL || result_multi == NULL)
     {
         printf("Memory not allocated, exiting the program!\n");
         return MEM_ALLOC_ERROR;
@@ -59,11 +79,97 @@ int main(void)
     printf("Enter file name!\n");
     scanf("%s", fileName);
 
-    check_msg = insert_from_file(fileName, head_arr);
+    check_msg = insert_from_file(fileName, sum_head_arr);
+
+    printf("Number of polynomials: %d\n", count_polynomial(sum_head_arr));
+
+    check_msg = insert_from_file(fileName, multi_head_arr);
+    
+    //test_array(head_arr);
+    result_sum = sum_polynomial(sum_head_arr);
+    
+
+    //printf("Result sum of all polynomials is: \n");
+    //print_list(result_sum);
+
+
+    //printf("\nlist copy:\n");
+    //test_array(multi_head_arr);
+
+
+    printf("Result multiplication of 2 polynomials is: \n");
+    result_multi = multiply_two_poly(multi_head_arr[1], multi_head_arr[2]);
+
+    //print_list(result_multi);
+    //print_list(head_arr[5]);
+    //printf("Number of members: %d\n", count_members(head_arr[5]));
 
 
     return SUCCESS;
 }
+
+int count_members(Polynomial* head)
+{
+    int i = 0;
+    Polynomial* temp = head->next;
+
+    do{
+        
+        i++;
+        temp = temp->next;
+
+    }while(temp != NULL);
+
+
+    return i;
+}
+
+
+Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2)
+{
+    Polynomial* result_head = (Polynomial*)calloc(1, sizeof(Polynomial));
+    Polynomial* tmp_head1 = head1->next;
+    Polynomial* tmp_head2 = head2->next;
+    Polynomial** factor_arr = (Polynomial**)calloc(count_members(head1), sizeof(Polynomial*));
+
+    if(result_head == NULL){
+        return MEM_ALLOC_ERROR;
+    }
+
+    int i = 1;
+    int multi_temp = 0;
+    int exp_temp = 0;
+
+    do{
+        Polynomial* tmp_head = (Polynomial*)calloc(1, sizeof(Polynomial));
+
+        do{
+            multi_temp = tmp_head1->multiplier * tmp_head2->multiplier;
+            exp_temp = tmp_head1->exp + tmp_head2->exp;
+            insert_end(&tmp_head, multi_temp, exp_temp);
+
+            
+            tmp_head2 = tmp_head2->next;
+        }while((tmp_head2) != NULL);
+        print_list(tmp_head);
+        
+        *(factor_arr+i) = tmp_head;
+        //delete temp_head
+        delete_list(tmp_head);
+
+        tmp_head1 = tmp_head1->next;
+        i = i + 1;
+    }while((tmp_head1) != NULL);
+
+    test_array(factor_arr);
+
+    //result_head = (sum_polynomial(factor_arr));
+    //free(factor_arr);
+
+
+    return result_head;
+}
+
 
 int insert_from_file(char* fileName, Polynomial** head_arr)
 {
@@ -71,7 +177,7 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
     int exp = 0;
     int count_read = 0;
     int steps = 0;
-    int i = 0, j = 0;
+    int i = 0, j = 0, chk_msg = 0;
     int buffer_len;
     Polynomial *head = NULL, *temp_linked;
 
@@ -105,9 +211,15 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
         if ((strcmp("\n", buffer) != 0))
         {
             head = NULL;
-            i = i + 1;
-            *(head_arr + i) = (Polynomial*)calloc(1, sizeof(Polynomial));
-             head = *(head_arr + i);
+
+            //only do this if the polynomial before this one was entered into the list
+            //if not new one will take its place so no need to allocate new memory
+            if (chk_msg != EMPTY_POLYNOMIAL)
+            {
+                i = i + 1;
+                *(head_arr + i) = (Polynomial*)calloc(1, sizeof(Polynomial));
+                head = *(head_arr + i);
+            }
 
             do
             {
@@ -115,7 +227,9 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
                 steps = steps + count_read;
 
                 //storing values read from file
-                insert_sorted(&head, multiplier, exp);
+                if (multiplier != 0){
+                    insert_sorted(&head, multiplier, exp);
+                }
                 //insert_end(&head, multiplier, exp);
                 
                 //printf("Multiplier: %d Exp: %d CountRead: %d I: %d\n",multiplier, exp, count_read, i);
@@ -129,17 +243,21 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
                 
 
             }while(steps != buffer_len);
-            //funkcija provjera
+            //checking the polynominal
+            chk_msg = check_polynominal(head);
 
-            //adding 
-            *(head_arr + i) = head;
+            //if check is successful then add onto the array if not skip
+            if (chk_msg == EMPTY_POLYNOMIAL){
+                //adding 
+                *(head_arr + i) = head;
+            }
         }
         
     }
     //head arr prazan gg triba vidit to mozda pokusat stavit da head_arr drzi adrese od headova a ne bas headove
     
     //test if its stored corretly
-    test_array(head_arr);
+    //test_array(head_arr);
 
 
     //closing the text file
@@ -147,6 +265,200 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
 
     return SUCCESS;
 }
+
+
+
+
+Polynomial* sum_polynomial(Polynomial** head_arr)
+{
+    Polynomial** tmp_head_arr = head_arr;
+    //test_array(tmp_head_arr);
+
+    Polynomial* result_head = (Polynomial*)calloc(1, sizeof(Polynomial));
+    if(result_head == NULL){
+        return MEM_ALLOC_ERROR;
+    
+    }
+    result_head->exp = 0;
+    result_head->multiplier = 0;
+    result_head->next = NULL;
+
+    int temp = NOT_END_OF_LIST;
+    int i = 0;
+    int result_exp = 0;
+    int result_multiplier = 0;
+    int curr_exp = 0;
+    int curr_multiplier = 0;
+    int chk_msg = 0;
+    int prev_result_exp = MAX_EXPONENT;
+    //getting the num of members in head arr array
+    int num_of_polynomials = count_polynomial(tmp_head_arr);
+
+    do{
+        result_exp = -MAX_EXPONENT;
+        result_multiplier = 0;
+
+        for(i = 1; i<=num_of_polynomials; i++)
+        {
+            curr_exp = ((*(tmp_head_arr+i))->next)->exp;
+
+            if((curr_exp > result_exp) && (curr_exp < prev_result_exp)){
+                result_exp = curr_exp;
+            }
+        }
+        prev_result_exp = result_exp;
+
+
+        for(i = 1; i<=num_of_polynomials; i++)
+        {
+            curr_exp = ((*(tmp_head_arr+i))->next)->exp;
+            curr_multiplier = ((*(tmp_head_arr+i))->next)->multiplier;
+
+            if(curr_exp == result_exp)
+            {
+                result_multiplier = result_multiplier + curr_multiplier;
+
+                //moving the ones that we sum to the right
+                //((*(tmp_head_arr+i))->next) = ((*(tmp_head_arr+i))->next)->next;
+            }
+        }
+
+        chk_msg = insert_end(&result_head, result_multiplier, result_exp);
+        if (chk_msg != SUCCESS){
+            printf("Error while summing!\n");
+            return SUM_ERROR;
+        }
+
+        //checking if all lists have reached the end
+        for(i = 1; i<=num_of_polynomials; i++)
+        {
+            if((((*(tmp_head_arr+i))->next)->next) == NULL){
+                temp = END_OF_LIST;
+            }
+            else{
+                temp = NOT_END_OF_LIST;
+                break;
+            }
+
+        }
+
+        for(i = 1; i<=num_of_polynomials; i++)
+        {
+            curr_exp = ((*(tmp_head_arr+i))->next)->exp;
+            curr_multiplier = ((*(tmp_head_arr+i))->next)->multiplier;
+
+            if((curr_exp == result_exp) && ((((*(tmp_head_arr+i))->next)->next) != NULL))
+            {
+                //moving the ones that we sum to the right
+                ((*(tmp_head_arr+i))->next) = ((*(tmp_head_arr+i))->next)->next;
+            }
+        }
+
+    }while(temp != END_OF_LIST);
+
+    //checking the polynomial and shortening it
+    chk_msg = check_polynominal(result_head);
+    if (chk_msg == EMPTY_POLYNOMIAL){
+        return EMPTY_POLYNOMIAL;
+    }
+
+
+    //test_array(tmp_head_arr);
+    //test_array(head_arr);
+    return result_head;
+}
+
+
+//breaking the list apart and freeing memory from members 1 by 1
+int delete_list(Polynomial* head)
+{
+    Polynomial* temp = head->next;
+
+    do
+    {
+        delete_member(head, temp->exp);
+        temp = head->next;
+      
+    }while (temp != NULL);
+
+    free(head);
+
+    return SUCCESS;
+}
+
+
+
+int count_polynomial(Polynomial** head_arr)
+{
+    int n_of_members = 0;
+    int i = 1;
+
+    do{
+        if(*(head_arr + i) == NULL){
+            break;
+        }
+        i ++;
+
+    }while(1);
+
+    n_of_members = i - 1;
+
+    return n_of_members;
+}
+
+
+
+int check_polynominal(Polynomial* head)
+{
+    Polynomial* current = head;
+    
+    do{
+        current = current->next;
+
+        //checking if the multiplier with exponent x is 0 and deleting it if so
+        if (current->multiplier == 0)
+        {
+            delete_member(head, current->exp);
+        }
+
+    }while(current->next != NULL);
+
+    //if after shortening it its now empty then we dont need to insert it into the array
+    if (head->next == NULL){
+        return EMPTY_POLYNOMIAL;
+    }
+
+
+    return SUCCESS;
+}
+
+
+//removing 1 member from the list
+int delete_member(Polynomial* head, int exp)
+{
+    //calling function to get previous member
+    Polynomial* prev = find_exp(head, exp);
+    Polynomial* temp = NULL;
+
+    //check if we can find right member
+    if (prev == NULL)
+    {
+        printf("Couldn't find the member with exponent %d!\n", exp);
+        return DEL_ERROR;
+    }
+
+    //if we found the member proceed in deleting
+    temp = prev->next;
+    prev->next = (prev->next)->next;
+    temp->next = NULL;
+
+    //free memory from deatached member
+    free(temp);
+
+
+    return SUCCESS;
+}
+
 
 //adding a member at the last place in the list
 int insert_end(Polynomial** head, int multiplier, int exp)
@@ -194,7 +506,63 @@ int print_list(Polynomial* head)
 
     do {
         //printing values from the list
-        printf("\tMultiplier: %d Exponent: %d\n",temp->multiplier, temp->exp);
+        if(temp->next == NULL){
+            if (temp->multiplier == 1)
+            {
+
+                if(temp->exp == 1){
+                    printf("x\n");
+                }
+                else if (temp->exp == 0){
+                    printf("1\n");
+                }
+                else{
+                    printf("x^%d\n", temp->exp);
+                }
+
+            }
+            else
+            {
+                if(temp->exp == 1){
+                    printf("%dx\n", temp->multiplier);
+                }
+                else if (temp->exp == 0){
+                    printf("%d\n", temp->multiplier);
+                }
+                else{
+                    printf("%dx^%d\n",temp->multiplier, temp->exp);
+                }
+            }
+        }
+        
+        else{
+            if (temp->multiplier == 1)
+            {
+
+                if(temp->exp == 1){
+                    printf("x + ");
+                }
+                else if (temp->exp == 0){
+                    printf("1 + ");
+                }
+                else{
+                    printf("x^%d + ", temp->exp);
+                }
+
+            }
+            else
+            {
+                if(temp->exp == 1){
+                    printf("%dx + ", temp->multiplier);
+                }
+                else if (temp->exp == 0){
+                    printf("%d + ", temp->multiplier);
+                }
+                else{
+                    printf("%dx^%d + ",temp->multiplier, temp->exp);
+                }
+            }
+        }
         temp = temp->next;
 
     } while (temp != NULL);
@@ -360,7 +728,7 @@ Polynomial* find_exp(Polynomial* head, int exp)
 -dodaj funkciju provjera koja provjerava je li polinom skroz skracen ako nije
 -skracuje ga do kraja (ako bude nula ne dodaje ga u array)
 -ako je skracen in nije nula vreaca 0 i mozemo ga dodat u array
--ako ne preskacemo i onda novi polinom ce ic na njegovo misto
+-ako ne, preskacemo i onda novi polinom ce ic na njegovo misto
 
 -zbrajanje polinoma
 -mnozenje polinoma
