@@ -39,37 +39,45 @@ typedef struct _Polynomial{
 
 //function definitions
 int insert_from_file(char*, Polynomial**);
-int insert_end(Polynomial** head, int, int);
-int insert_end2(Polynomial** head, int, int);
-int insert_sorted(Polynomial** head, int, int);
-int print_list(Polynomial* head);
-void test_array(Polynomial** head_arr);
-int insert_before(Polynomial** head, int, int, int);
+int insert_end(Polynomial**, int, int);
+int insert_end2(Polynomial**, int, int);
+int insert_sorted(Polynomial**, int, int);
+int print_list(Polynomial*);
+void test_array(Polynomial**);
+int insert_before(Polynomial**, int, int, int);
 Polynomial* find_exp(Polynomial*, int);
-int check_polynominal(Polynomial* head);
-int delete_member(Polynomial* head, int exp);
-int delete_list(Polynomial* head);
-Polynomial* sum_polynomial(Polynomial** head_arr);
-int count_polynomial(Polynomial** head_arr);
+int check_polynominal(Polynomial*);
+int delete_member(Polynomial*, int);
+int delete_list(Polynomial*);
+Polynomial* sum_polynomial(Polynomial**);
+int count_polynomial(Polynomial**);
 int count_members(Polynomial*);
-Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2);
-Polynomial* multiply_one_poly(Polynomial** result_head, Polynomial* head2, int, int);
-Polynomial* multiply(Polynomial** head_arr);
+Polynomial* multiply_two_poly(Polynomial*, Polynomial*);
+Polynomial* multiply_one_poly(Polynomial**, Polynomial*, int, int);
+Polynomial* multiply(Polynomial**);
+int clear_memory(Polynomial**, Polynomial**, Polynomial*, Polynomial*, int);
 
 
 int main(void)
 {
-    Polynomial** sum_head_arr;
-    Polynomial** multi_head_arr;
-    Polynomial* result_sum;
-    Polynomial* result_multi;
+    //variables for main
     char fileName[MAX_FILE_NAME] = {"\0"};
-    int check_msg = 0;
+    int check_msg1 = 0, check_msg2 = 0;
     int i = 0;
+    int num_of_polys = 0;
+
+    //arrays of linked lists which take input
+    Polynomial** sum_head_arr; //used for sum
+    Polynomial** multi_head_arr; //used for multiplication
+
+    //linked lists which store the result of operations
+    Polynomial* result_sum; //used for sum
+    Polynomial* result_multi; //used for multiplication
+    
     
     //allocating an array of heads
-    sum_head_arr = (Polynomial**)calloc(MAX_POLYNOMIAL, sizeof(Polynomial*));
-    multi_head_arr = (Polynomial**)calloc(MAX_POLYNOMIAL, sizeof(Polynomial*));
+    sum_head_arr = (Polynomial**)calloc(MAX_POLYNOMIAL, sizeof(Polynomial*)); //allocated for max poly supported, later reallocated
+    multi_head_arr = (Polynomial**)calloc(MAX_POLYNOMIAL, sizeof(Polynomial*)); //allocated for max poly supported, later reallocated
     result_sum = (Polynomial*)calloc(1, sizeof(Polynomial));
     result_multi = (Polynomial*)calloc(1, sizeof(Polynomial));
 
@@ -80,33 +88,96 @@ int main(void)
         return MEM_ALLOC_ERROR;
     }
 
+    //asking user to enter the file name
     printf("Enter file name!\n");
     scanf("%s", fileName);
 
-    check_msg = insert_from_file(fileName, sum_head_arr);
-    check_msg = insert_from_file(fileName, multi_head_arr);
+    //inserting from file to arrays used later for operations
+    check_msg1 = insert_from_file(fileName, sum_head_arr);
+    check_msg2 = insert_from_file(fileName, multi_head_arr);
+
+    //checking whether both arrays stored data correctly, if not exiting
+    if (check_msg1 || check_msg2)
+    {
+        printf("Error while reading info from file!\n");
+        return FILE_READ_ERROR;
+    }
     
-    printf("Number of polynomials: %d\n", count_polynomial(sum_head_arr));
+    num_of_polys = count_polynomial(sum_head_arr);
+    printf("\nNumber of polynomials read from file: %d\n", num_of_polys);
+
 
     //sum of all polynomials
     result_sum = sum_polynomial(sum_head_arr);
 
-    printf("Result sum of all polynomials is: \n");
+    printf("\nResult sum of all polynomials is: \n");
     print_list(result_sum);
+    printf("\n");
+
 
     //multiplication of all polynomials
     result_multi = multiply(multi_head_arr);
 
     printf("Result multiplication of all polynomials is: \n");
     print_list(result_multi);
+    printf("\n");
     
+
+    //clearing memory 
+    check_msg1 = clear_memory(sum_head_arr, multi_head_arr, result_sum, result_multi, num_of_polys);
+
+    if(check_msg1 == DEL_ERROR){
+        printf("Error while freeing data!\n");
+        return DEL_ERROR;
+    }
+
+    return SUCCESS;
+}
+
+
+//function that frees all allocated memory
+int clear_memory(Polynomial** sum_arr, Polynomial** multi_arr, Polynomial* sum_res,
+Polynomial* multi_res, int n_of_polyinomials)
+{
+    //variables to check success
+    int chk_msg1 = 0;
+    int chk_msg2 = 0;
+    int i = 0;
+
+    //firstly free the results
+    chk_msg1 = delete_list(sum_res);
+    chk_msg2 = delete_list(multi_res);
+
+    if (chk_msg1 || chk_msg2)
+    {
+        printf("Error while reading info from file!\n");
+        return DEL_ERROR;
+    }
+
+    //clearing the arrays of polyinomials
+    for(i = 1; i<=n_of_polyinomials; i++)
+    {
+        chk_msg1 = delete_list(*(sum_arr+i));
+        chk_msg2 = delete_list(*(multi_arr+i));
+
+        if (chk_msg1 || chk_msg2)
+        {
+            printf("Error while reading info from file!\n");
+            return DEL_ERROR;
+        }
+    }
+
+    //clearing the start of array
+    free(sum_arr);
+    free(multi_arr);
+
 
     return SUCCESS;
 }
 
 
 
-
+//function that counts members of a linked list
 int count_members(Polynomial* head)
 {
     int i = 0;
@@ -120,10 +191,11 @@ int count_members(Polynomial* head)
     }while(temp != NULL);
 
 
-    return i;
+    return i; //returns the number of members in a linked list
 }
 
 
+//function that calculates the multiplication of all polynomials in an array
 Polynomial* multiply(Polynomial** head_arr)
 {
     Polynomial* result_head = (Polynomial*)calloc(1, sizeof(Polynomial));
@@ -136,14 +208,16 @@ Polynomial* multiply(Polynomial** head_arr)
 
     result_head = head_arr[1];
 
+    //number of polynomials in the array
     num_pol = count_polynomial(head_arr);
+
+    //looping through all polys except the first one and getting individual products
     for (i = 2; i<=num_pol; i++)
     {
         result_head = multiply_two_poly(result_head, head_arr[i]);
-
     }
 
-    return result_head;
+    return result_head; //returs the product of all individual products
 }
 
 
@@ -162,9 +236,9 @@ Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2)
         result_head = multiply_one_poly(&result_head, head2, tmp_head1->multiplier, tmp_head1->exp);
 
         tmp_head1 = tmp_head1->next;
+
     }while((tmp_head1) != NULL);
 
-   //print_list(result_head);
 
     return result_head;
 }
@@ -178,25 +252,30 @@ Polynomial* multiply_one_poly(Polynomial** result_head, Polynomial* head2, int m
     int exp_temp = 0;
    
     do{
+
         multi_temp = multi1 * tmp_head2->multiplier;
         exp_temp = exp1 + tmp_head2->exp;
         insert_sorted(result_head, multi_temp, exp_temp);
 
-            
         tmp_head2 = tmp_head2->next;
+        
     }while((tmp_head2) != NULL);
 
     return *result_head;
 }
 
+
+//function that inserts polys from file sorted and shortened
 int insert_from_file(char* fileName, Polynomial** head_arr)
 {
+    //variables
     int multiplier = 0;
     int exp = 0;
     int count_read = 0;
     int steps = 0;
     int i = 0, j = 0, chk_msg = 0;
     int buffer_len;
+    int n_of_polynomials = 0;
     Polynomial *head = NULL, *temp_linked;
 
     //opening the text file and setting it to a variable
@@ -248,9 +327,7 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
                 if (multiplier != 0){
                     insert_sorted(&head, multiplier, exp);
                 }
-                //insert_end(&head, multiplier, exp);
                 
-                //printf("Multiplier: %d Exp: %d CountRead: %d I: %d\n",multiplier, exp, count_read, i);
                 if(steps > buffer_len){
                     printf("Wrong input, error with reading from file!\n");
                     return FILE_READ_ERROR;
@@ -272,11 +349,10 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
         }
         
     }
-    //head arr prazan gg triba vidit to mozda pokusat stavit da head_arr drzi adrese od headova a ne bas headove
-    
-    //test if its stored corretly
-    //test_array(head_arr);
 
+    //checking how many polynomials it stored and reallocating the memory
+    //n_of_polynomials = count_polynomial(head_arr);
+    //head_arr = realloc(head_arr, n_of_polynomials * sizeof(Polynomial*));
 
     //closing the text file
     fclose(fp);
@@ -285,12 +361,11 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
 }
 
 
-
-
+//function that returns the sum off all polys in sent array
 Polynomial* sum_polynomial(Polynomial** head_arr)
 {
     Polynomial** tmp_head_arr = head_arr;
-    test_array(tmp_head_arr);
+    //test_array(tmp_head_arr);
 
     Polynomial* result_head = (Polynomial*)calloc(1, sizeof(Polynomial));
     if(result_head == NULL){
@@ -335,9 +410,6 @@ Polynomial* sum_polynomial(Polynomial** head_arr)
             if(curr_exp == result_exp)
             {
                 result_multiplier = result_multiplier + curr_multiplier;
-
-                //moving the ones that we sum to the right
-                //((*(tmp_head_arr+i))->next) = ((*(tmp_head_arr+i))->next)->next;
             }
         }
 
@@ -403,7 +475,7 @@ int delete_list(Polynomial* head)
 }
 
 
-
+//function that counts the number of linked lists in given array
 int count_polynomial(Polynomial** head_arr)
 {
     int n_of_members = 0;
@@ -423,7 +495,7 @@ int count_polynomial(Polynomial** head_arr)
 }
 
 
-
+//checking polynomial for zeros or elements that need shortening
 int check_polynominal(Polynomial* head)
 {
     Polynomial* current = head;
@@ -588,6 +660,7 @@ int print_list(Polynomial* head)
 }
 
 
+//function for testing the array of linked lists
 void test_array(Polynomial** head_arr)
 {
     int i = 0;
@@ -603,6 +676,8 @@ void test_array(Polynomial** head_arr)
 
 }
 
+
+//function that inserts a new member in a linked list so that its already sorted
 int insert_sorted(Polynomial** head, int multiplier, int exp)
 {
     Polynomial* current = *head;
@@ -656,6 +731,7 @@ int insert_sorted(Polynomial** head, int multiplier, int exp)
 }
 
 
+//function for inserting a new member at the from of a linked list
 int insert_front(Polynomial** head, int multiplier, int exp)
 {
     Polynomial* new_member = (Polynomial*)calloc(1, sizeof(Polynomial));
@@ -679,6 +755,7 @@ int insert_front(Polynomial** head, int multiplier, int exp)
 }
 
 
+//function for inserting a new member into a linked list infront another member
 int insert_before(Polynomial** head, int multiplier, int exp, int exp_after)
 {
     //new member
@@ -710,7 +787,7 @@ int insert_before(Polynomial** head, int multiplier, int exp, int exp_after)
 }
 
 
-//find the first member with given surname and return the member behind
+//find the first member with given exponent and return the member behind
 Polynomial* find_exp(Polynomial* head, int exp)
 {
     Polynomial* temp = NULL;
@@ -725,7 +802,7 @@ Polynomial* find_exp(Polynomial* head, int exp)
     temp = head;
 
     do {
-        //finding the right surname and looping through
+        //finding the right exponent and looping through
         if (temp->next->exp == exp) {
             //if its the right one then break and return it
             return temp; //returning the one before one we wanted to find
@@ -739,3 +816,9 @@ Polynomial* find_exp(Polynomial* head, int exp)
     return temp;
 }
 
+/*
+    Everything basically done, just need to:
+    -add more checks when using other functions
+    -delete useless code if theres any
+    -try to fix realloc not working (if theres time)
+*/
