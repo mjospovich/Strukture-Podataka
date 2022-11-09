@@ -38,6 +38,7 @@ typedef struct _Polynomial{
 //function definitions
 int insert_from_file(char*, Polynomial**);
 int insert_end(Polynomial** head, int, int);
+int insert_end2(Polynomial** head, int, int);
 int insert_sorted(Polynomial** head, int, int);
 int print_list(Polynomial* head);
 void test_array(Polynomial** head_arr);
@@ -49,8 +50,9 @@ int delete_list(Polynomial* head);
 Polynomial* sum_polynomial(Polynomial** head_arr);
 int count_polynomial(Polynomial** head_arr);
 int count_members(Polynomial*);
-Polynomial* multiply_two_poly(Polynomial*, Polynomial*);
+Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2);
 void copy_arr_poly(Polynomial**, Polynomial**);
+Polynomial* super_fun(Polynomial** result_head, Polynomial* head2, int, int);
 
 
 int main(void)
@@ -139,29 +141,33 @@ Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2)
     int i = 1;
     int multi_temp = 0;
     int exp_temp = 0;
-
+    int memb_num = count_members(tmp_head2);
     do{
-        Polynomial* tmp_head = (Polynomial*)calloc(1, sizeof(Polynomial));
+        //Polynomial* tmp_head = (Polynomial*)calloc(1, sizeof(Polynomial));
 
+        /*
         do{
             multi_temp = tmp_head1->multiplier * tmp_head2->multiplier;
             exp_temp = tmp_head1->exp + tmp_head2->exp;
-            insert_end(&tmp_head, multi_temp, exp_temp);
+            insert_sorted(&result_head, multi_temp, exp_temp);
 
             
             tmp_head2 = tmp_head2->next;
         }while((tmp_head2) != NULL);
-        print_list(tmp_head);
+        */
+
+        result_head = super_fun(&result_head, head2, tmp_head1->multiplier, tmp_head1->exp);
+        //print_list((*(factor_arr+i)));
         
-        *(factor_arr+i) = tmp_head;
-        //delete temp_head
-        delete_list(tmp_head);
+        //*(factor_arr+i) = tmp_head;B
+        //delete_list(tmp_head);
 
         tmp_head1 = tmp_head1->next;
         i = i + 1;
     }while((tmp_head1) != NULL);
 
-    test_array(factor_arr);
+    print_list(result_head);
+    //test_array(factor_arr);
 
     //result_head = (sum_polynomial(factor_arr));
     //free(factor_arr);
@@ -170,6 +176,27 @@ Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2)
     return result_head;
 }
 
+Polynomial* super_fun(Polynomial** result_head, Polynomial* head2, int multi1, int exp1)
+{
+    //Polynomial* result_head = (Polynomial*)calloc(1, sizeof(Polynomial));
+    Polynomial* tmp_head2 = head2->next;
+
+    int i = 1;
+    int multi_temp = 0;
+    int exp_temp = 0;
+    int memb_num = count_members(tmp_head2);
+  
+    do{
+        multi_temp = multi1 * tmp_head2->multiplier;
+        exp_temp = exp1 + tmp_head2->exp;
+        insert_sorted(result_head, multi_temp, exp_temp);
+
+            
+        tmp_head2 = tmp_head2->next;
+    }while((tmp_head2) != NULL);
+
+    return *result_head;
+}
 
 int insert_from_file(char* fileName, Polynomial** head_arr)
 {

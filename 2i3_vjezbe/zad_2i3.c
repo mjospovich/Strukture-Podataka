@@ -15,7 +15,6 @@
 #define DEL_ERROR (-1)
 #define MAX_LINE (128)
 #define INSERT_ERROR (-1)
-#define MENU_ERROR (-1)
 
 
 struct _Person;
@@ -35,15 +34,16 @@ typedef struct _Person {
 //function definitions
 int insert_from_file(char*, Person*);
 int export_to_file(char*, Person*);
-int insert_end(Person**, char*, char*, int);
-int insert_front(Person**, char*, char*, int);
-Person* find_next_surname(Person*, char*); 
+int insert_end(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
+int insert_front(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
+Person* find_next_surname(Person*, char[MAX_NAME_SIZE]); //this function is used in print/delete member
 int print_list(Person*);
-int delete_member(Person*, char*);
-int print_member(Person*, char*);
+int delete_member(Person*, char[MAX_NAME_SIZE]);
+int print_member(Person*, char[MAX_NAME_SIZE]);
 int delete_list(Person*);
-int insert_next(Person**, char*, char*, int);
-int insert_before(Person**, char*, char*, int);
+int insert_next(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
+int insert_before(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int);
+int insert_before_no_inpt(Person**, char[MAX_NAME_SIZE], char[MAX_NAME_SIZE], int, char[MAX_NAME_SIZE]);
 int bubble_sort(Person*);
 int print_menu();
 int freeing_memory(Person*);
@@ -54,17 +54,13 @@ int main(void)
 {
     //variables for input
     int choice = 0;
-    char name[MAX_NAME_SIZE] = { "/0" };
-    char surname[MAX_NAME_SIZE] = { "/0" };
+    char name[MAX_NAME_SIZE] = { "\0" };
+    char surname[MAX_NAME_SIZE] = { "\0" };
     int birthYear = 0;
     int catch_msg = 0;
     char fileName[MAX_FILE_NAME] = { 0 };
 
-    //the head of linked list
     Person* head = create_person();
-    if (head == NULL){
-        return MEM_ALLOC_ERROR;
-    }
 
     //mainloop
     do
@@ -72,11 +68,7 @@ int main(void)
         choice = 0;
         catch_msg = 0;
 
-        catch_msg = print_menu();
-        if (catch_msg != SUCCESS){
-            return MENU_ERROR;
-        }
-
+        print_menu();
         scanf("%d", &choice);
 
         //asking needed input
@@ -218,15 +210,12 @@ int main(void)
 
     } while (choice != 0);
 
-
-    //free memory and check if it did that
-    if (!freeing_memory(head)){
-        return DEL_ERROR;
-    }
+    freeing_memory(head);
 
     return SUCCESS;
 }
 
+//create person 
 Person* create_person()
 {
      //declaring head and setting everything to NULL
@@ -235,7 +224,7 @@ Person* create_person()
     if (head == NULL)
     {
         printf("Memory hasn't allocated properly!\n");
-        return head; //head = NULL here
+        return MEM_ALLOC_ERROR;
     }
 
     //initialization
@@ -255,10 +244,6 @@ int freeing_memory(Person* head)
     deleted = delete_list(head);
     if (deleted == 0)
         printf("Memory freed!\n");
-    else{
-        printf("Couldn't free the memory!");
-        return DEL_ERROR;
-    }
 
     printf("Exiting the program...\n");
 
@@ -316,7 +301,10 @@ int bubble_sort(Person* head)
 
     }
 
+    
+
     return SUCCESS;
+
 }
 
 
@@ -417,7 +405,7 @@ int export_to_file(char* fileName, Person* head)
 
 
 //adding a member after another member in the list
-int insert_next(Person** head, char* name , char* surname, int birthYear)
+int insert_next(Person** head, char name[MAX_NAME_SIZE] , char surname[MAX_NAME_SIZE], int birthYear)
 {
     char surname_prev[MAX_NAME_SIZE] = "";
     printf("Enter surname of the member you want to insert after:\n");
@@ -460,7 +448,7 @@ int insert_next(Person** head, char* name , char* surname, int birthYear)
 
 
 //adding a member before another member in the list
-int insert_before(Person** head, char* name , char* surname, int birthYear)
+int insert_before(Person** head, char name[MAX_NAME_SIZE] , char surname[MAX_NAME_SIZE], int birthYear)
 {
     //member before whoom we will insert new one
     char surname_after[MAX_NAME_SIZE] = "";
@@ -501,7 +489,8 @@ int insert_before(Person** head, char* name , char* surname, int birthYear)
 
 
 //adding a member at the last place in the list
-int insert_end(Person** head, char* name, char *surname, int birthYear)
+int insert_end(Person** head, char name[MAX_NAME_SIZE],
+    char surname[MAX_NAME_SIZE], int birthYear)
 {
     Person* new_person = (Person*)calloc(1, sizeof(Person));
     //checking if memory has allocated or not
@@ -531,7 +520,7 @@ int insert_end(Person** head, char* name, char *surname, int birthYear)
 
 
 //adding a member after head in the list
-int insert_front(Person** head, char* name, char* surname, int birthYear)
+int insert_front(Person** head, char name[MAX_NAME_SIZE], char surname[MAX_NAME_SIZE], int birthYear)
 {
     Person* new_person = (Person*)calloc(1, sizeof(Person));
     //checking if memory has allocated or not
@@ -556,7 +545,7 @@ int insert_front(Person** head, char* name, char* surname, int birthYear)
 
 
 //removing 1 member from the list
-int delete_member(Person* head, char* surname)
+int delete_member(Person* head, char surname[MAX_NAME_SIZE])
 {
     //calling function to get previous member
     Person* prev = find_next_surname(head, surname);
@@ -583,7 +572,7 @@ int delete_member(Person* head, char* surname)
 
 
 //print given member info
-int print_member(Person* head, char* surname)
+int print_member(Person* head, char surname[MAX_NAME_SIZE])
 {
     Person* wanted = find_next_surname(head, surname)->next;
 
@@ -599,7 +588,7 @@ int print_member(Person* head, char* surname)
 
 
 //find the first member with given surname and return the member behind
-Person* find_next_surname(Person* head, char* surname)
+Person* find_next_surname(Person* head, char surname[MAX_NAME_SIZE])
 {
     Person* temp = NULL;
 
