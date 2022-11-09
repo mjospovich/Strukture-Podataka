@@ -51,8 +51,7 @@ Polynomial* sum_polynomial(Polynomial** head_arr);
 int count_polynomial(Polynomial** head_arr);
 int count_members(Polynomial*);
 Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2);
-void copy_arr_poly(Polynomial**, Polynomial**);
-Polynomial* super_fun(Polynomial** result_head, Polynomial* head2, int, int);
+Polynomial* multiply_one_poly(Polynomial** result_head, Polynomial* head2, int, int);
 
 
 int main(void)
@@ -101,14 +100,22 @@ int main(void)
 
     printf("Result multiplication of 2 polynomials is: \n");
     result_multi = multiply_two_poly(multi_head_arr[1], multi_head_arr[2]);
+    print_list(result_multi);
 
-    //print_list(result_multi);
-    //print_list(head_arr[5]);
-    //printf("Number of members: %d\n", count_members(head_arr[5]));
+    /*
+    //A NAMA ZAPRAVO TREBA - dole pseudo kod
+    result_multi = multiply(multi_head_arr);
+    print_list(result_multi);
+    */
+
+    
 
 
     return SUCCESS;
 }
+
+
+
 
 int count_members(Polynomial* head)
 {
@@ -126,66 +133,52 @@ int count_members(Polynomial* head)
     return i;
 }
 
+/*
+Polynomial* multiply(Polynomial** head_arr)
+{
+    PSEUDO
+    result = head_arr[1];
+
+    num_pol = count_polynomial
+    for od i do num_pol
+    i=2
+    result = multiply_two_poly(result, head_arr[i])
+
+    provjera jel 0 i to?
+
+    return result_head;
+}
+*/
 
 Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2)
 {
     Polynomial* result_head = (Polynomial*)calloc(1, sizeof(Polynomial));
     Polynomial* tmp_head1 = head1->next;
     Polynomial* tmp_head2 = head2->next;
-    Polynomial** factor_arr = (Polynomial**)calloc(count_members(head1), sizeof(Polynomial*));
 
     if(result_head == NULL){
         return MEM_ALLOC_ERROR;
     }
 
-    int i = 1;
-    int multi_temp = 0;
-    int exp_temp = 0;
-    int memb_num = count_members(tmp_head2);
     do{
-        //Polynomial* tmp_head = (Polynomial*)calloc(1, sizeof(Polynomial));
 
-        /*
-        do{
-            multi_temp = tmp_head1->multiplier * tmp_head2->multiplier;
-            exp_temp = tmp_head1->exp + tmp_head2->exp;
-            insert_sorted(&result_head, multi_temp, exp_temp);
-
-            
-            tmp_head2 = tmp_head2->next;
-        }while((tmp_head2) != NULL);
-        */
-
-        result_head = super_fun(&result_head, head2, tmp_head1->multiplier, tmp_head1->exp);
-        //print_list((*(factor_arr+i)));
-        
-        //*(factor_arr+i) = tmp_head;B
-        //delete_list(tmp_head);
+        result_head = multiply_one_poly(&result_head, head2, tmp_head1->multiplier, tmp_head1->exp);
 
         tmp_head1 = tmp_head1->next;
-        i = i + 1;
     }while((tmp_head1) != NULL);
 
     print_list(result_head);
-    //test_array(factor_arr);
-
-    //result_head = (sum_polynomial(factor_arr));
-    //free(factor_arr);
-
 
     return result_head;
 }
 
-Polynomial* super_fun(Polynomial** result_head, Polynomial* head2, int multi1, int exp1)
+Polynomial* multiply_one_poly(Polynomial** result_head, Polynomial* head2, int multi1, int exp1)
 {
-    //Polynomial* result_head = (Polynomial*)calloc(1, sizeof(Polynomial));
     Polynomial* tmp_head2 = head2->next;
 
-    int i = 1;
     int multi_temp = 0;
     int exp_temp = 0;
-    int memb_num = count_members(tmp_head2);
-  
+   
     do{
         multi_temp = multi1 * tmp_head2->multiplier;
         exp_temp = exp1 + tmp_head2->exp;
