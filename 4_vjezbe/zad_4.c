@@ -1,4 +1,6 @@
+#pragma warning (disable: 4047)
 #define _CRT_SECURE_NO_WARNINGS
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -52,6 +54,7 @@ int count_polynomial(Polynomial** head_arr);
 int count_members(Polynomial*);
 Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2);
 Polynomial* multiply_one_poly(Polynomial** result_head, Polynomial* head2, int, int);
+Polynomial* multiply(Polynomial** head_arr);
 
 
 int main(void)
@@ -81,35 +84,22 @@ int main(void)
     scanf("%s", fileName);
 
     check_msg = insert_from_file(fileName, sum_head_arr);
-
-    printf("Number of polynomials: %d\n", count_polynomial(sum_head_arr));
-
     check_msg = insert_from_file(fileName, multi_head_arr);
     
-    //test_array(head_arr);
+    printf("Number of polynomials: %d\n", count_polynomial(sum_head_arr));
+
+    //sum of all polynomials
     result_sum = sum_polynomial(sum_head_arr);
-    
 
-    //printf("Result sum of all polynomials is: \n");
-    //print_list(result_sum);
+    printf("Result sum of all polynomials is: \n");
+    print_list(result_sum);
 
-
-    //printf("\nlist copy:\n");
-    //test_array(multi_head_arr);
-
-
-    printf("Result multiplication of 2 polynomials is: \n");
-    result_multi = multiply_two_poly(multi_head_arr[1], multi_head_arr[2]);
-    print_list(result_multi);
-
-    /*
-    //A NAMA ZAPRAVO TREBA - dole pseudo kod
+    //multiplication of all polynomials
     result_multi = multiply(multi_head_arr);
+
+    printf("Result multiplication of all polynomials is: \n");
     print_list(result_multi);
-    */
-
     
-
 
     return SUCCESS;
 }
@@ -133,22 +123,29 @@ int count_members(Polynomial* head)
     return i;
 }
 
-/*
+
 Polynomial* multiply(Polynomial** head_arr)
 {
-    PSEUDO
-    result = head_arr[1];
+    Polynomial* result_head = (Polynomial*)calloc(1, sizeof(Polynomial));
+    int num_pol = 0;
+    int i = 0;
 
-    num_pol = count_polynomial
-    for od i do num_pol
-    i=2
-    result = multiply_two_poly(result, head_arr[i])
+    if(result_head == NULL){
+        return MEM_ALLOC_ERROR;
+    }
 
-    provjera jel 0 i to?
+    result_head = head_arr[1];
+
+    num_pol = count_polynomial(head_arr);
+    for (i = 2; i<=num_pol; i++)
+    {
+        result_head = multiply_two_poly(result_head, head_arr[i]);
+
+    }
 
     return result_head;
 }
-*/
+
 
 Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2)
 {
@@ -167,10 +164,11 @@ Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2)
         tmp_head1 = tmp_head1->next;
     }while((tmp_head1) != NULL);
 
-    print_list(result_head);
+   //print_list(result_head);
 
     return result_head;
 }
+
 
 Polynomial* multiply_one_poly(Polynomial** result_head, Polynomial* head2, int multi1, int exp1)
 {
@@ -292,7 +290,7 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
 Polynomial* sum_polynomial(Polynomial** head_arr)
 {
     Polynomial** tmp_head_arr = head_arr;
-    //test_array(tmp_head_arr);
+    test_array(tmp_head_arr);
 
     Polynomial* result_head = (Polynomial*)calloc(1, sizeof(Polynomial));
     if(result_head == NULL){
@@ -352,7 +350,7 @@ Polynomial* sum_polynomial(Polynomial** head_arr)
         //checking if all lists have reached the end
         for(i = 1; i<=num_of_polynomials; i++)
         {
-            if((((*(tmp_head_arr+i))->next)->next) == NULL){
+            if((((*(tmp_head_arr+i))->next)->next) == NULL && (((*(tmp_head_arr+i))->next)->exp >= result_exp)){
                 temp = END_OF_LIST;
             }
             else{
@@ -376,15 +374,13 @@ Polynomial* sum_polynomial(Polynomial** head_arr)
 
     }while(temp != END_OF_LIST);
 
+
     //checking the polynomial and shortening it
     chk_msg = check_polynominal(result_head);
     if (chk_msg == EMPTY_POLYNOMIAL){
         return EMPTY_POLYNOMIAL;
     }
 
-
-    //test_array(tmp_head_arr);
-    //test_array(head_arr);
     return result_head;
 }
 
@@ -743,16 +739,3 @@ Polynomial* find_exp(Polynomial* head, int exp)
     return temp;
 }
 
-
-/*toDO
--dodaj funkciju provjera koja provjerava je li polinom skroz skracen ako nije
--skracuje ga do kraja (ako bude nula ne dodaje ga u array)
--ako je skracen in nije nula vreaca 0 i mozemo ga dodat u array
--ako ne, preskacemo i onda novi polinom ce ic na njegovo misto
-
--zbrajanje polinoma
--mnozenje polinoma
-
--dosta provjera i ciscenja koda
-
-*/
