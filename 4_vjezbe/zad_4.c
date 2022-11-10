@@ -206,11 +206,15 @@ Polynomial* multiply(Polynomial** head_arr)
         return MEM_ALLOC_ERROR;
     }
 
+    //at the start the first polynomail is stored in result
     result_head = head_arr[1];
 
     //number of polynomials in the array
     num_pol = count_polynomial(head_arr);
 
+
+    //we then the send result polynomail and the next polynominal to multyiply function
+    //we store that again in result and send that polynomial back to the fun with the next poly
     //looping through all polys except the first one and getting individual products
     for (i = 2; i<=num_pol; i++)
     {
@@ -220,7 +224,7 @@ Polynomial* multiply(Polynomial** head_arr)
     return result_head; //returs the product of all individual products
 }
 
-
+//function that calculates the multiplication of 2 polynominals
 Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2)
 {
     Polynomial* result_head = (Polynomial*)calloc(1, sizeof(Polynomial));
@@ -231,8 +235,10 @@ Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2)
         return MEM_ALLOC_ERROR;
     }
 
+    //going thorugh memebers of one poolynominal 
     do{
 
+        //sending each members multiplier and exp to function that will multiply that member with each member of the other poly
         result_head = multiply_one_poly(&result_head, head2, tmp_head1->multiplier, tmp_head1->exp);
 
         tmp_head1 = tmp_head1->next;
@@ -243,7 +249,7 @@ Polynomial* multiply_two_poly(Polynomial* head1, Polynomial* head2)
     return result_head;
 }
 
-
+//function that calculates the multiplication of (a*x^b)*(polynominal)
 Polynomial* multiply_one_poly(Polynomial** result_head, Polynomial* head2, int multi1, int exp1)
 {
     Polynomial* tmp_head2 = head2->next;
@@ -251,8 +257,10 @@ Polynomial* multiply_one_poly(Polynomial** result_head, Polynomial* head2, int m
     int multi_temp = 0;
     int exp_temp = 0;
    
-    do{
 
+    //we multiply one member at a time
+    do{
+        //multipliers are multiplying, exponents are suming
         multi_temp = multi1 * tmp_head2->multiplier;
         exp_temp = exp1 + tmp_head2->exp;
         insert_sorted(result_head, multi_temp, exp_temp);
