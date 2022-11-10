@@ -22,6 +22,7 @@
 #define NOT_END_OF_LIST (1)
 #define MAX_EXPONENT (32)
 #define SUM_ERROR (-1)
+#define MULTIPLICATION_ERROR (-1)
 
 
 struct _Polynomial;
@@ -130,6 +131,9 @@ int main(void)
         printf("Error while freeing data!\n");
         return DEL_ERROR;
     }
+    else{
+        printf("Memory freed, exitning the program!\n\n");
+    }
 
     return SUCCESS;
 }
@@ -221,6 +225,7 @@ Polynomial* multiply(Polynomial** head_arr)
         result_head = multiply_two_poly(result_head, head_arr[i]);
     }
 
+
     return result_head; //returs the product of all individual products
 }
 
@@ -256,6 +261,7 @@ Polynomial* multiply_one_poly(Polynomial** result_head, Polynomial* head2, int m
 
     int multi_temp = 0;
     int exp_temp = 0;
+    int chk_msg = 0;
    
 
     //we multiply one member at a time
@@ -263,7 +269,11 @@ Polynomial* multiply_one_poly(Polynomial** result_head, Polynomial* head2, int m
         //multipliers are multiplying, exponents are suming
         multi_temp = multi1 * tmp_head2->multiplier;
         exp_temp = exp1 + tmp_head2->exp;
-        insert_sorted(result_head, multi_temp, exp_temp);
+        chk_msg = insert_sorted(result_head, multi_temp, exp_temp);
+
+        if (chk_msg){
+            return INSERTION_ERROR;
+        }
 
         tmp_head2 = tmp_head2->next;
         
@@ -284,7 +294,7 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
     int i = 0, j = 0, chk_msg = 0;
     int buffer_len;
     int n_of_polynomials = 0;
-    Polynomial *head = NULL, *temp_linked;
+    Polynomial *head = NULL, *temp_linked = NULL;
 
     //opening the text file and setting it to a variable
     FILE *fp = NULL;
@@ -333,7 +343,11 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
 
                 //storing values read from file
                 if (multiplier != 0){
-                    insert_sorted(&head, multiplier, exp);
+                    chk_msg = insert_sorted(&head, multiplier, exp);
+
+                    if (chk_msg != SUCCESS){
+                        return INSERTION_ERROR;
+                    }
                 }
                 
                 if(steps > buffer_len){
@@ -350,7 +364,7 @@ int insert_from_file(char* fileName, Polynomial** head_arr)
             chk_msg = check_polynominal(head);
 
             //if check is successful then add onto the array if not skip
-            if (chk_msg == EMPTY_POLYNOMIAL){
+            if (chk_msg == SUCCESS){
                 //adding 
                 *(head_arr + i) = head;
             }
@@ -469,11 +483,16 @@ Polynomial* sum_polynomial(Polynomial** head_arr)
 int delete_list(Polynomial* head)
 {
     Polynomial* temp = head->next;
+    int chk_msg = 0;
 
     do
     {
-        delete_member(head, temp->exp);
+        chk_msg = delete_member(head, temp->exp);
         temp = head->next;
+
+        if(chk_msg != SUCCESS){
+            return DEL_ERROR;
+        }
       
     }while (temp != NULL);
 
@@ -507,6 +526,7 @@ int count_polynomial(Polynomial** head_arr)
 int check_polynominal(Polynomial* head)
 {
     Polynomial* current = head;
+    int chk_msg = 0;
     
     do{
         current = current->next;
@@ -514,7 +534,11 @@ int check_polynominal(Polynomial* head)
         //checking if the multiplier with exponent x is 0 and deleting it if so
         if (current->multiplier == 0)
         {
-            delete_member(head, current->exp);
+            chk_msg = delete_member(head, current->exp);
+
+            if (chk_msg != SUCCESS){
+                return DEL_ERROR;
+            }
         }
 
     }while(current->next != NULL);
@@ -693,7 +717,12 @@ int insert_sorted(Polynomial** head, int multiplier, int exp)
 
     if (current->next == NULL)
     {
-        insert_front(head, multiplier, exp);
+        chk_msg = insert_front(head, multiplier, exp);
+        
+        if(chk_msg != SUCCESS){
+            return INSERTION_ERROR;
+        }
+
         return SUCCESS;
     }
 
@@ -823,10 +852,3 @@ Polynomial* find_exp(Polynomial* head, int exp)
     //returning NULL if nothing is found
     return temp;
 }
-
-/*
-    Everything basically done, just need to:
-    -add more checks when using other functions
-    -delete useless code if theres any
-    -try to fix realloc not working (if theres time)
-*/
