@@ -17,6 +17,7 @@
 #define MAX_BUFFER_SIZE (1024)
 #define MAX_FILE_NAME (128)
 #define MAX_LINE (128)
+#define INSERTION_ERROR (-1)
 
 
 struct _Stack;
@@ -33,7 +34,9 @@ typedef struct _Stack{
 
 
 int insert_from_file(char*, char*);
-int give_next(char*, char*, int*);
+int give_next(char*, int*, char*, int*);
+int insert_end(Stack**, int);
+int print_list(Stack*);
 
 
 int main(void)
@@ -68,7 +71,9 @@ int main(void)
 
     do{
 
-      current_step = give_next(line, &operator, &operand);
+      current_step = give_next(line, &line_len, &operator, &operand);
+      //printf("\tstep %d/%d => ", current_step, line_len);
+
       if (current_step == BAD_INPUT){
         printf("Wrong input detected, exiting the program!\n");
         return BAD_INPUT;
@@ -76,26 +81,36 @@ int main(void)
 
       if(operand == 0 && operator != '\0')
       {
-        printf("%c\n", operator);
+        //OPERATE
+        //printf("%c\n", operator);
       }
       else if (operand != 0)
       {
-        printf("%d\n", operand);
+        //OPERATE
+        //ADD TO LIST
+        chk_msg = insert_end(&head, operand);
+        if (chk_msg == SUCCESS){
+          return SUCCESS;
+        }
+        else{
+          return INSERTION_ERROR;
+        }
+        //printf("%d\n", operand);
       }
       else{
-        printf("Kurac\n");
+        printf("whoops\n");
       }
       
 
     }while (current_step <= line_len - 1);
     
-
+    print_list(head);
 
     return SUCCESS;
 }
 
 
-int give_next(char* line, char* operator, int* operand)
+int give_next(char* line, int* line_len, char* operator, int* operand)
 {
   static int steps = 0;
   int step = 2;
@@ -108,7 +123,10 @@ int give_next(char* line, char* operator, int* operand)
 
   strcpy(temp, line + steps);
 
-  sscanf_msg1 = sscanf(temp, "%d %n", &temp_operand, &n);
+  //this would return an error if an operator is on the place
+  if ((*(line_len)-steps)!=1){
+    sscanf_msg1 = sscanf(temp, "%d %n", &temp_operand, &n);
+  }
   sscanf_msg2 = sscanf(temp, "%c", &temp_operator);
 
   if(sscanf_msg1 == 1){
@@ -116,6 +134,7 @@ int give_next(char* line, char* operator, int* operand)
     step = n;
   }
   else if(sscanf_msg1 == -1){
+    //printf("msg1!!!!\n");
     return BAD_INPUT;
   }
   else{
@@ -126,6 +145,7 @@ int give_next(char* line, char* operator, int* operand)
     *(operator) = temp_operator;
   }
   else if(sscanf_msg2 == -1){
+    //printf("msg2!!!!\n");
     return BAD_INPUT;
   }
   else{
@@ -165,8 +185,57 @@ int insert_from_file(char* fileName, char* line)
   return SUCCESS;
 }
 
+//adding a member at the last place in the list
+int insert_end(Stack** head, int value)
+{
+    Stack* new_member = (Stack*)calloc(1, sizeof(Stack));
+    Stack* current = *head;
+
+    //checking if memory has allocated or not
+    if (new_member == NULL)
+    {
+        printf("Memory hasn't allocated properly!\n");
+        return MEM_ALLOC_ERROR;
+    }
+
+    //last member points to NULL
+    new_member->next = NULL;
+
+    //assigning values to the new member
+    new_member->value = value;
+    
+    //looping until we reach the previuos last member
+    while (current->next != NULL) 
+    {
+        current = current->next;
+    }
+    current->next = new_member;
+
+    return SUCCESS;
+}
+
+int print_list(Stack* head)
+{
+    //chacking if list is empty before printing
+    if (head->next == NULL)
+    {
+        printf("List is empty, nothing to print!");
+        return EMPTY_LIST_WARNING;
+    }
+
+    //temp variable on stack for looping through the list
+    Stack* temp = head->next;
+
+    do {
+        //printing values from the list
+        printf("\tValue= %d\n", temp->value);
+
+        temp = temp->next;
+    } while (temp != NULL);
 
 
+    return SUCCESS;
+}
 /*
     printf("Scanf je vratio: %d", sscanf("+", "%d", &b));
 
