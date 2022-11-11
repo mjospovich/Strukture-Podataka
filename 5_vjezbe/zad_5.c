@@ -39,7 +39,7 @@ int main()
     head->value = 0;
 		char line[MAX_LINE] = {"\0"};
     
-    printf("Scanf je vratio: ", sscanf("25", "%d", &n));
+    printf("Scanf je vratio: ", sscanf(" ", "%d", &n));
 
 
 
@@ -72,4 +72,4 @@ int insert_from_file(char* fileName, char* line)
 
 
   //copying data from variables to the structure via pointer
-	
+}
