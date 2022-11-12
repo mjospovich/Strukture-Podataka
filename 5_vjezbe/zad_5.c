@@ -36,6 +36,7 @@ int insert_from_file(char*, char*);
 int give_next(char*, int*, char*, int*);
 int insert_end(Stack**, int);
 int print_list(Stack*);
+int count_members(Stack*);
 
 
 int main(void)
@@ -81,12 +82,15 @@ int main(void)
       if(operand == 0 && operator != '\0')
       {
         //OPERATE
+        if((count_members(head))>=2)
+        {
+          printf("\tmoze ic operacija\n");
+        }
         //printf("%c\n", operator);
       }
 
       else if (operand != 0)
       {
-        //OPERATE
         //ADD TO LIST
         //printf("%d\n", operand);
         chk_msg = insert_end(&head, operand);
@@ -234,6 +238,23 @@ int print_list(Stack* head)
 
 
     return SUCCESS;
+}
+
+//function that counts members of a linked list
+int count_members(Stack* head)
+{
+    int i = 0;
+    Stack* temp = head->next;
+
+    do{
+        
+        i++;
+        temp = temp->next;
+
+    }while(temp != NULL);
+
+
+    return i; //returns the number of members in a linked list
 }
 /*
     printf("Scanf je vratio: %d", sscanf("+", "%d", &b));
