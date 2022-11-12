@@ -1,4 +1,3 @@
-
 // #pragma warning (disable: 4047)
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -28,7 +27,7 @@ typedef struct _Stack* Position;
 typedef struct _Stack{
 
     int value;
-    Position* next;
+    Position next;
 
 }Stack;
 
@@ -84,20 +83,20 @@ int main(void)
         //OPERATE
         //printf("%c\n", operator);
       }
+
       else if (operand != 0)
       {
         //OPERATE
         //ADD TO LIST
+        //printf("%d\n", operand);
         chk_msg = insert_end(&head, operand);
-        if (chk_msg == SUCCESS){
-          return SUCCESS;
-        }
-        else{
+        if (chk_msg != SUCCESS){
           return INSERTION_ERROR;
         }
-        //printf("%d\n", operand);
-      }
-      else{
+      } 
+
+      else
+      {
         printf("whoops\n");
       }
       
