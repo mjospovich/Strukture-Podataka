@@ -18,6 +18,8 @@
 #define MAX_LINE (128)
 #define INSERTION_ERROR (-1)
 #define OPERATE_ERROR (-1)
+#define STACK_ERROR (-1)
+#define PRINT_ERROR (-1)
 
 
 struct _Stack;
@@ -40,6 +42,7 @@ int print_list(Stack*);
 int count_members(Stack*);
 Stack* find_behind_last(Stack*);
 int delete_member_after(Stack*);
+int check_stack(Stack*);
 
 
 int main(void)
@@ -122,10 +125,47 @@ int main(void)
 
     }while (current_step <= line_len - 1);
     
-    print_list(head);
+
+    //checking if the final stack is ok
+    chk_msg = check_stack(head);
+    if (chk_msg != SUCCESS){
+      printf("Stack is empty, or it has too many values!\n");
+      return STACK_ERROR;
+    }
+
+
+    printf("\nFinal stack looks like this:\n");
+  
+    chk_msg = print_list(head); //printing the final stack
+    if (chk_msg != SUCCESS){
+      printf("Error while printing!\n");
+      return PRINT_ERROR;
+    }
+
+    //freeing memory
+    chk_msg = delete_stack(head);
+    if (chk_msg != SUCCESS){
+      printf("Error while clearing memory!\n");
+      return DEL_ERROR;
+    }
+    printf("\nMemory freed!\n\n");
+
 
     return SUCCESS;
 }
+
+
+//checking if final stack is right
+int check_stack(Stack* head)
+{
+  if (head->next == NULL || head->next->next != NULL){
+    return STACK_ERROR; //in the end stack needs to contain only one int
+  }
+
+  //final stack is ok
+  return SUCCESS;
+}
+
 
 int operate(Stack* head, char operator)
 {
@@ -189,6 +229,7 @@ int operate(Stack* head, char operator)
   return SUCCESS;
 }
 
+
 int give_next(char* line, int* line_len, char* operator, int* operand)
 {
   static int steps = 0;
@@ -233,6 +274,7 @@ int give_next(char* line, int* line_len, char* operator, int* operand)
 
   return steps;
 }
+
 
 int insert_from_file(char* fileName, char* line)
 {
@@ -289,6 +331,7 @@ int insert_end(Stack** head, int value)
     return SUCCESS;
 }
 
+
 int print_list(Stack* head)
 {
     //chacking if list is empty before printing
@@ -329,6 +372,7 @@ int count_members(Stack* head)
     return i; //returns the number of members in a linked list
 }
 
+
 Stack* find_behind_last(Stack* head)
 {
     Stack* temp = NULL;
@@ -350,6 +394,29 @@ Stack* find_behind_last(Stack* head)
     return temp;
 }
 
+
+int delete_stack(Stack* head)
+{
+    Stack* temp = head->next;
+    int chk_msg = 0;
+
+    do
+    {
+        chk_msg = delete_member_after(head);
+        if (chk_msg != SUCCESS){
+          return DEL_ERROR;
+        }
+
+        temp = head->next;
+      
+    }while (temp != NULL);
+
+    free(head);
+
+    return SUCCESS;
+}
+
+
 int delete_member_after(Stack* head)
 {
     Stack* temp = NULL;
@@ -357,7 +424,7 @@ int delete_member_after(Stack* head)
     //check if we can find right member
     if (head == NULL)
     {
-        return OPERATE_ERROR;
+        return DEL_ERROR;
     }
 
     //if we found the member proceed in deleting
