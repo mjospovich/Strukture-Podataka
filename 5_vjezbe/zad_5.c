@@ -17,6 +17,7 @@
 #define MAX_FILE_NAME (128)
 #define MAX_LINE (128)
 #define INSERTION_ERROR (-1)
+#define OPERATE_ERROR (-1)
 
 
 struct _Stack;
@@ -31,12 +32,14 @@ typedef struct _Stack{
 
 }Stack;
 
-
+int operate(Stack*, char);
 int insert_from_file(char*, char*);
 int give_next(char*, int*, char*, int*);
 int insert_end(Stack**, int);
 int print_list(Stack*);
 int count_members(Stack*);
+Stack* find_behind_last(Stack*);
+int delete_member_after(Stack*);
 
 
 int main(void)
@@ -82,9 +85,21 @@ int main(void)
       if(operand == 0 && operator != '\0')
       {
         //OPERATE
+        //can't operate if less than 2 members in list
         if((count_members(head))>=2)
         {
-          printf("\tmoze ic operacija\n");
+          //poziv za operate()
+
+          chk_msg = operate(head, operator);
+          if (chk_msg){
+            return OPERATE_ERROR;
+          }
+          //printf("\tmoze ic operacija\n");
+        }
+        else
+        {
+          printf("list is not valid\n");
+          return INSERTION_ERROR;
         }
         //printf("%c\n", operator);
       }
@@ -112,6 +127,21 @@ int main(void)
     return SUCCESS;
 }
 
+int operate(Stack* head, char operator)
+{
+  int chk_msg = 0;
+  printf("operand: %c\n", operator);
+  Stack* behind_last_member = find_behind_last(head);
+
+  chk_msg = delete_member_after(behind_last_member);
+  if (chk_msg != SUCCESS){
+    //printf("iz delete_member");
+    return OPERATE_ERROR;
+  }
+  print_list(head);
+
+  return SUCCESS;
+}
 
 int give_next(char* line, int* line_len, char* operator, int* operand)
 {
@@ -159,8 +189,6 @@ int give_next(char* line, int* line_len, char* operator, int* operand)
 
   return steps;
 }
-
-
 
 int insert_from_file(char* fileName, char* line)
 {
@@ -256,6 +284,49 @@ int count_members(Stack* head)
 
     return i; //returns the number of members in a linked list
 }
+
+Stack* find_behind_last(Stack* head)
+{
+    Stack* temp = NULL;
+
+    //check if list is empty
+    if (head->next == NULL)
+    {
+        printf("List is empty, nothing to find!");
+        return temp;
+    }
+
+    temp = head;
+
+    while ((temp->next)->next != NULL)
+    {
+        temp = temp->next;
+    } 
+
+    return temp;
+}
+
+int delete_member_after(Stack* head)
+{
+    Stack* temp = NULL;
+
+    //check if we can find right member
+    if (head == NULL)
+    {
+        return OPERATE_ERROR;
+    }
+
+    //if we found the member proceed in deleting
+    temp = head->next;
+    head->next = NULL;
+
+    //free memory from deatached member
+    free(temp);
+
+
+    return SUCCESS;
+}
+
 /*
     printf("Scanf je vratio: %d", sscanf("+", "%d", &b));
 
