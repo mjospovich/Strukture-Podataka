@@ -38,7 +38,7 @@ int operate(Stack*, char);
 int insert_from_file(char*, char*);
 int give_next(char*, int*, char*, int*);
 int insert_end(Stack**, int);
-int print_list(Stack*);
+int print_stack(Stack*);
 int count_members(Stack*);
 Stack* find_behind_last(Stack*);
 int delete_member_after(Stack*);
@@ -97,6 +97,9 @@ int main(void)
           if (chk_msg){
             return OPERATE_ERROR;
           }
+          printf("Current stack:\n");
+          print_stack(head);
+          printf("\n");
           //printf("\tmoze ic operacija\n");
         }
         else
@@ -129,14 +132,16 @@ int main(void)
     //checking if the final stack is ok
     chk_msg = check_stack(head);
     if (chk_msg != SUCCESS){
-      printf("Stack is empty, or it has too many values!\n");
+      printf("\nFinal stack looks like this:\n");
+      print_stack(head);
+      printf("Final stack doesn't have one int like it should!\n");
       return STACK_ERROR;
     }
 
 
-    printf("\nFinal stack looks like this:\n");
+    printf("Final stack looks like this:\n");
   
-    chk_msg = print_list(head); //printing the final stack
+    chk_msg = print_stack(head); //printing the final stack
     if (chk_msg != SUCCESS){
       printf("Error while printing!\n");
       return PRINT_ERROR;
@@ -332,7 +337,7 @@ int insert_end(Stack** head, int value)
 }
 
 
-int print_list(Stack* head)
+int print_stack(Stack* head)
 {
     //chacking if list is empty before printing
     if (head->next == NULL)
@@ -346,7 +351,7 @@ int print_list(Stack* head)
 
     do {
         //printing values from the list
-        printf("\tValue= %d\n", temp->value);
+        printf("\t|%4d  |\n", temp->value);
 
         temp = temp->next;
     } while (temp != NULL);
@@ -440,11 +445,6 @@ int delete_member_after(Stack* head)
 
 /*
 TO DO
-napravit provjeru posli operacija jel samo jedan član u listi
-deletat listu na kraju (freeanje)
-vidit sta cemo s djljenjem 
-popravit tabove koji su se meni zeznili
-zakomentirat jos par stvari
-opcijonalno stavit main u funkciju
-opcijonalno dodat na ispisu svaki put kad se ness izracuna
+-provjerit jel sve good
+-dodat pokoji komentar za funkcije
 */ 
