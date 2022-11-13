@@ -133,28 +133,54 @@ int operate(Stack* head, char operator)
   int last_value = 0;
   int behind_last_value = 0;
   int result_value = 0;
-  printf("operand: %c\n", operator);
+  //printf("operand: %c\n", operator);
 
   Stack* behind_last_member = find_behind_last(head);
 
   behind_last_value = behind_last_member->value;
   last_value = (behind_last_member->next)->value;
 
+  //deleting last member
   chk_msg = delete_member_after(behind_last_member);
   if (chk_msg != SUCCESS){
     //printf("iz delete_member");
     return OPERATE_ERROR;
   }
 
-  //deleting on more member
+  //deleting one more member
   behind_last_member = find_behind_last(head);
   chk_msg = delete_member_after(behind_last_member);
   if (chk_msg != SUCCESS){
-    //printf("iz delete_member");
     return OPERATE_ERROR;
   }
 
-  result_value = behind_last_value + last_value;
+  //finding operator
+  switch(operator)
+  {
+      case '+':
+        result_value = behind_last_value + last_value;
+        break;
+
+      case '-':
+        result_value = behind_last_value - last_value;
+        break;
+
+      case '*':
+        result_value = behind_last_value * last_value;
+        break;
+
+      case '/':
+        //stacemo s ovin
+        result_value = behind_last_value / last_value;
+        break;
+
+      // operator doesn't match any case constant +, -, *, /
+      default:
+       return OPERATE_ERROR;     
+  }
+
+
+  //insertig the result back to the list
   chk_msg = insert_end(&head, result_value);
   if (chk_msg != SUCCESS){
     return INSERTION_ERROR;
@@ -187,7 +213,6 @@ int give_next(char* line, int* line_len, char* operator, int* operand)
     step = n;
   }
   else if(sscanf_msg1 == -1){
-    //printf("msg1!!!!\n");
     return BAD_INPUT;
   }
   else{
@@ -198,7 +223,6 @@ int give_next(char* line, int* line_len, char* operator, int* operand)
     *(operator) = temp_operator;
   }
   else if(sscanf_msg2 == -1){
-    //printf("msg2!!!!\n");
     return BAD_INPUT;
   }
   else{
@@ -348,10 +372,12 @@ int delete_member_after(Stack* head)
 }
 
 /*
-    printf("Scanf je vratio: %d", sscanf("+", "%d", &b));
-
-    printf("\nb: %d", b);
-    printf("Scanf je vratio: %d", sscanf("+", "%c", &n));
-
-    printf("\nn: %c", n);
-    */
+TO DO
+napravit provjeru posli operacija jel samo jedan član u listi
+deletat listu na kraju (freeanje)
+vidit sta cemo s djljenjem 
+popravit tabove koji su se meni zeznili
+zakomentirat jos par stvari
+opcijonalno stavit main u funkciju
+opcijonalno dodat na ispisu svaki put kad se ness izracuna
+*/ 
