@@ -130,15 +130,35 @@ int main(void)
 int operate(Stack* head, char operator)
 {
   int chk_msg = 0;
+  int last_value = 0;
+  int behind_last_value = 0;
+  int result_value = 0;
   printf("operand: %c\n", operator);
+
   Stack* behind_last_member = find_behind_last(head);
+
+  behind_last_value = behind_last_member->value;
+  last_value = (behind_last_member->next)->value;
 
   chk_msg = delete_member_after(behind_last_member);
   if (chk_msg != SUCCESS){
     //printf("iz delete_member");
     return OPERATE_ERROR;
   }
-  print_list(head);
+
+  //deleting on more member
+  behind_last_member = find_behind_last(head);
+  chk_msg = delete_member_after(behind_last_member);
+  if (chk_msg != SUCCESS){
+    //printf("iz delete_member");
+    return OPERATE_ERROR;
+  }
+
+  result_value = behind_last_value + last_value;
+  chk_msg = insert_end(&head, result_value);
+  if (chk_msg != SUCCESS){
+    return INSERTION_ERROR;
+  }
 
   return SUCCESS;
 }
