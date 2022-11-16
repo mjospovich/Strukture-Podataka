@@ -26,7 +26,6 @@ struct _Stack;
 
 typedef struct _Stack* Position;
 
-//structure Person type structure _Person
 typedef struct _Stack{
 
     int value;
@@ -171,7 +170,7 @@ int check_stack(Stack* head)
   return SUCCESS;
 }
 
-
+//operates with 2 last operands in the list(stack)
 int operate(Stack* head, char operator)
 {
   int chk_msg = 0;
@@ -234,7 +233,7 @@ int operate(Stack* head, char operator)
   return SUCCESS;
 }
 
-
+//going through string and returning the next operator/operand
 int give_next(char* line, int* line_len, char* operator, int* operand)
 {
   static int steps = 0;
@@ -248,13 +247,14 @@ int give_next(char* line, int* line_len, char* operator, int* operand)
 
   strcpy(temp, line + steps);
 
-  //this would return an error if an operator is on the place
+  //this would return an error if an operator is on the last place
   if ((*(line_len)-steps)!=1){
     sscanf_msg1 = sscanf(temp, "%d %n", &temp_operand, &n);
   }
   sscanf_msg2 = sscanf(temp, "%c", &temp_operator);
 
   if(sscanf_msg1 == 1){
+    //returning operand
     *(operand) = temp_operand;
     step = n;
   }
@@ -266,6 +266,7 @@ int give_next(char* line, int* line_len, char* operator, int* operand)
   }
 
   if(sscanf_msg2 == 1){
+    //returning operator
     *(operator) = temp_operator;
   }
   else if(sscanf_msg2 == -1){
@@ -280,7 +281,7 @@ int give_next(char* line, int* line_len, char* operator, int* operand)
   return steps;
 }
 
-
+//insert content from a file to string
 int insert_from_file(char* fileName, char* line)
 {
   int i = 0;
@@ -336,7 +337,7 @@ int insert_end(Stack** head, int value)
     return SUCCESS;
 }
 
-
+//prints all members of list
 int print_stack(Stack* head)
 {
     //chacking if list is empty before printing
@@ -377,7 +378,7 @@ int count_members(Stack* head)
     return i; //returns the number of members in a linked list
 }
 
-
+//finds list member behind the last member
 Stack* find_behind_last(Stack* head)
 {
     Stack* temp = NULL;
@@ -399,7 +400,7 @@ Stack* find_behind_last(Stack* head)
     return temp;
 }
 
-
+//deletes whole list
 int delete_stack(Stack* head)
 {
     Stack* temp = head->next;
@@ -421,7 +422,7 @@ int delete_stack(Stack* head)
     return SUCCESS;
 }
 
-
+//deletes next list member for the one given
 int delete_member_after(Stack* head)
 {
     Stack* temp = NULL;
@@ -443,8 +444,3 @@ int delete_member_after(Stack* head)
     return SUCCESS;
 }
 
-/*
-TO DO
--provjerit jel sve good
--dodat pokoji komentar za funkcije
-*/ 
