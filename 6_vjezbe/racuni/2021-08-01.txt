@@ -1,0 +1,3 @@
+banana 3 5.99
+mlijeko 2 10.99
+jogurt 1 3.99
