@@ -47,17 +47,18 @@ Position create_stack_head();
 Tree_Pos insert_sorted(Tree_Pos current, Tree_Pos new_dir);
 int make_dir(Tree_Pos current);
 int print_dir(Tree_Pos current);
-int pop_from_stack(Position* head);
-int push_on_stack(Position* head, Tree_Pos current);
+int pop_from_stack(Position head);
+int push_on_stack(Position head, Tree_Pos *current);
 int change_dir(Position head, Tree_Pos *current);
 Tree_Pos delete_tree(Tree_Pos current);
 int delete_stack(Position head);
-int exit_program(Tree_Pos root, Position head);
+int exit_program(Tree_Pos *root, Position head);
 
 int main()
 {
 
-  int check_msg_1 = 0, check_msg_2 = 0;
+  int catch_msg = 0;
+  int choice = 0;
   Tree_Pos root = create_tree_root();  // allocates and names the root to C
   Position head = create_stack_head(); // allocates space for stack head and checks
   Tree_Pos current = root;
@@ -68,38 +69,98 @@ int main()
     return MEM_ALLOC_ERROR;
   }
 
-  make_dir(current);
-  make_dir(current);
-  print_dir(current);
-  change_dir(head, &current);
-  make_dir(current);
-  make_dir(current);
-  print_dir(current);
-  change_dir(head, &current);
-  print_dir(current);
+  // mainloop
+  do
+  {
+    choice = 0;
+    catch_msg = 0;
 
-  exit_program(root, head); 
+    printf("Choose:\n \t=> 1 md\n\t=> 2 cd\n\t=> 3 dir\n\t=> 4 exit\n");
+    scanf("%d", &choice);
+
+    switch (choice)
+    {
+    case 1:
+      catch_msg = make_dir(current);
+      if (SUCCESS == catch_msg)
+      {
+        // printf("\n");
+      }
+      else
+      {
+        printf("Error has occured!\n");
+      }
+
+      break;
+
+    case 2:
+      catch_msg = change_dir(head, &current);
+      if (SUCCESS == catch_msg)
+      {
+        // printf("\n");
+      }
+      else
+      {
+        printf("Error has occured!\n");
+      }
+      break;
+
+    case 3:
+      catch_msg = print_dir(current);
+      if (SUCCESS == catch_msg)
+      {
+        // printf("\n");
+      }
+      else
+      {
+        printf("Error has occured!\n");
+      }
+      break;
+
+    case 4:
+      catch_msg = exit_program(&root, head);
+      if (SUCCESS == catch_msg)
+      {
+        // printf("\n");
+      }
+      else
+      {
+        printf("Error has occured!\n");
+      }
+      break;
+
+    default:
+      break;
+    }
+
+    printf("\n");
+
+  } while (choice != 0);
+
   // ne radi delete stack napuni se nekin random values
   // al to nije glavni problem
   // stack neradi kako triva probably isa san minjat al odusta u pola pa to triba nastavit
-  //dodat pointer svaki put kad se minja a ne onako kako je bilo
-  print_dir(root);
+  // dodat pointer svaki put kad se minja a ne onako kako je bilo
+
+  // print_dir(root);
 
   return SUCCESS;
 }
 
-
-int exit_program(Tree_Pos root, Position head){
+int exit_program(Tree_Pos *root, Position head)
+{
   int check_msg_1 = 0, check_msg_2 = 0;
 
   check_msg_1 = delete_stack(head);
-  if(check_msg_1 != SUCCESS){
+  if (check_msg_1 != SUCCESS)
+  {
     return DEL_ERROR;
   }
 
-  root->child = delete_tree(root->child);
+  (*root)->child = delete_tree((*root)->child);
 
-  if((root->child) != NULL){
+  if (((*root)->child) != NULL)
+  {
     printf("Delete error!\n");
     return DEL_ERROR;
   }
@@ -108,10 +169,9 @@ int exit_program(Tree_Pos root, Position head){
   return SUCCESS;
 }
 
-
 Tree_Pos delete_tree(Tree_Pos current)
 {
-  if(current == NULL)
+  if (current == NULL)
   {
     return NULL;
   }
@@ -123,10 +183,15 @@ Tree_Pos delete_tree(Tree_Pos current)
   return NULL;
 }
 
-
 int delete_stack(Position head)
 {
   Position temp = NULL;
+
+  if (NULL == head->next)
+  {
+    free(head);
+    return SUCCESS;
+  }
 
   do
   {
@@ -136,7 +201,7 @@ int delete_stack(Position head)
     free(temp);
 
   } while (head->next != NULL);
-    free(head);
+  free(head);
 
   return SUCCESS;
 }
@@ -150,7 +215,7 @@ int change_dir(Position head, Tree_Pos *current)
   if (strcmp(name, "..") == 0)
   {
     (*current) = head->next->address;
-    pop_from_stack(&head);
+    pop_from_stack(head);
 
     return SUCCESS;
   }
@@ -161,7 +226,7 @@ int change_dir(Position head, Tree_Pos *current)
   {
     if (strcmp(temp->name, name) == 0)
     {
-      push_on_stack(&head, *current);
+      push_on_stack(head, current);
       (*current) = temp;
       return SUCCESS;
     }
@@ -174,24 +239,24 @@ int change_dir(Position head, Tree_Pos *current)
   return BAD_INPUT;
 }
 
-int pop_from_stack(Position* head)
+int pop_from_stack(Position head)
 {
-  if (NULL == (*head)->next)
+  if (NULL == head->next)
   {
     printf("Stack already empty\n");
     return SUCCESS;
   }
 
-  Position temp = (*head)->next;
+  Position temp = head->next;
 
-  (*head)->next = ((*head)->next)->next;
+  head->next = (head->next)->next;
   temp->next = NULL;
   free(temp);
 
   return SUCCESS;
 }
 
-int push_on_stack(Position* head, Tree_Pos current)
+int push_on_stack(Position head, Tree_Pos *current)
 {
   Position new_member = (Stack *)calloc(1, sizeof(Stack));
   if (NULL == new_member)
@@ -199,9 +264,9 @@ int push_on_stack(Position* head, Tree_Pos current)
     return MEM_ALLOC_ERROR;
   }
 
-  new_member->address = current;
-  new_member->next = (*head)->next;
-  (*head)->next = new_member;
+  new_member->address = *(current);
+  new_member->next = head->next;
+  head->next = new_member;
 
   return SUCCESS;
 }
