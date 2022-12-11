@@ -75,7 +75,7 @@ int main()
     choice = 0;
     catch_msg = 0;
 
-    printf("Choose:\n \t=> 1 md\n\t=> 2 cd\n\t=> 3 dir\n\t=> 4 exit\n");
+    printf("Choose:\n \t=> 1 md\n\t=> 2 cd\n\t=> 3 dir\n\t=> 4 exit\n\t\t\t=> ");
     scanf("%d", &choice);
 
     switch (choice)
@@ -84,7 +84,7 @@ int main()
       catch_msg = make_dir(current);
       if (SUCCESS == catch_msg)
       {
-        // printf("\n");
+        //printf("md ");
       }
       else
       {
@@ -97,11 +97,11 @@ int main()
       catch_msg = change_dir(head, &current);
       if (SUCCESS == catch_msg)
       {
-        // printf("\n");
+        //printf("cd ");
       }
       else
       {
-        printf("Error has occured!\n");
+        //printf("Error has occured!\n");
       }
       break;
 
@@ -121,7 +121,7 @@ int main()
       catch_msg = exit_program(&root, head);
       if (SUCCESS == catch_msg)
       {
-        // printf("\n");
+        printf("\n");
       }
       else
       {
@@ -137,12 +137,9 @@ int main()
 
   } while (choice != 0);
 
-  // print_dir(root);
-
   return SUCCESS;
 }
 
-// call funtions that delete the stack and the tree
 int exit_program(Tree_Pos *root, Position head)
 {
   int check_msg_1 = 0, check_msg_2 = 0;
@@ -165,7 +162,6 @@ int exit_program(Tree_Pos *root, Position head)
   return SUCCESS;
 }
 
-// delete whole tree at program exit
 Tree_Pos delete_tree(Tree_Pos current)
 {
   if (current == NULL)
@@ -180,7 +176,6 @@ Tree_Pos delete_tree(Tree_Pos current)
   return NULL;
 }
 
-// delete whole stack at program exit
 int delete_stack(Position head)
 {
   Position temp = NULL;
@@ -204,17 +199,18 @@ int delete_stack(Position head)
   return SUCCESS;
 }
 
-// change current dir to child or sibbling
 int change_dir(Position head, Tree_Pos *current)
 {
   char name[MAX_NAME_SIZE] = {'\0'};
-  printf("Name: ");
+  printf("cd ");
+  //printf("Name: ");
   scanf(" %s", name);
 
   if (strcmp(name, "..") == 0)
   {
     (*current) = head->next->address;
     pop_from_stack(head);
+    printf("In directory %s\n", (*current)->name);
 
     return SUCCESS;
   }
@@ -227,6 +223,7 @@ int change_dir(Position head, Tree_Pos *current)
     {
       push_on_stack(head, current);
       (*current) = temp;
+      printf("In directory %s\n", (*current)->name);
       return SUCCESS;
     }
     temp = temp->sibbling;
@@ -238,7 +235,6 @@ int change_dir(Position head, Tree_Pos *current)
   return BAD_INPUT;
 }
 
-// remove current from stack when movin backwards
 int pop_from_stack(Position head)
 {
   if (NULL == head->next)
@@ -256,7 +252,6 @@ int pop_from_stack(Position head)
   return SUCCESS;
 }
 
-// push current pos on stack when moving forward
 int push_on_stack(Position head, Tree_Pos *current)
 {
   Position new_member = (Stack *)calloc(1, sizeof(Stack));
@@ -272,7 +267,6 @@ int push_on_stack(Position head, Tree_Pos *current)
   return SUCCESS;
 }
 
-// prints out current dir
 int print_dir(Tree_Pos current)
 {
   Tree_Pos temp = current->child;
@@ -294,7 +288,6 @@ int print_dir(Tree_Pos current)
   return SUCCESS;
 }
 
-// allocate space for new dir then create it and insert it sorted
 int make_dir(Tree_Pos current)
 {
   Tree_Pos new_dir = NULL;
@@ -307,7 +300,8 @@ int make_dir(Tree_Pos current)
     return MEM_ALLOC_ERROR;
   }
 
-  printf("Name: ");
+  printf("md ");
+  //printf("Name: ");
   scanf(" %s", name);
 
   strcpy(new_dir->name, name);
@@ -324,7 +318,6 @@ int make_dir(Tree_Pos current)
   return SUCCESS;
 }
 
-// inserts sorted by alphabet order
 Tree_Pos insert_sorted(Tree_Pos current, Tree_Pos new_dir)
 {
   if (NULL == current)
