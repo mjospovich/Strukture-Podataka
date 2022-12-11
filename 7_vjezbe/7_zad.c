@@ -137,16 +137,12 @@ int main()
 
   } while (choice != 0);
 
-  // ne radi delete stack napuni se nekin random values
-  // al to nije glavni problem
-  // stack neradi kako triva probably isa san minjat al odusta u pola pa to triba nastavit
-  // dodat pointer svaki put kad se minja a ne onako kako je bilo
-
   // print_dir(root);
 
   return SUCCESS;
 }
 
+// call funtions that delete the stack and the tree
 int exit_program(Tree_Pos *root, Position head)
 {
   int check_msg_1 = 0, check_msg_2 = 0;
@@ -169,6 +165,7 @@ int exit_program(Tree_Pos *root, Position head)
   return SUCCESS;
 }
 
+// delete whole tree at program exit
 Tree_Pos delete_tree(Tree_Pos current)
 {
   if (current == NULL)
@@ -183,6 +180,7 @@ Tree_Pos delete_tree(Tree_Pos current)
   return NULL;
 }
 
+// delete whole stack at program exit
 int delete_stack(Position head)
 {
   Position temp = NULL;
@@ -206,6 +204,7 @@ int delete_stack(Position head)
   return SUCCESS;
 }
 
+// change current dir to child or sibbling
 int change_dir(Position head, Tree_Pos *current)
 {
   char name[MAX_NAME_SIZE] = {'\0'};
@@ -239,6 +238,7 @@ int change_dir(Position head, Tree_Pos *current)
   return BAD_INPUT;
 }
 
+// remove current from stack when movin backwards
 int pop_from_stack(Position head)
 {
   if (NULL == head->next)
@@ -256,6 +256,7 @@ int pop_from_stack(Position head)
   return SUCCESS;
 }
 
+// push current pos on stack when moving forward
 int push_on_stack(Position head, Tree_Pos *current)
 {
   Position new_member = (Stack *)calloc(1, sizeof(Stack));
@@ -271,6 +272,7 @@ int push_on_stack(Position head, Tree_Pos *current)
   return SUCCESS;
 }
 
+// prints out current dir
 int print_dir(Tree_Pos current)
 {
   Tree_Pos temp = current->child;
@@ -292,6 +294,7 @@ int print_dir(Tree_Pos current)
   return SUCCESS;
 }
 
+// allocate space for new dir then create it and insert it sorted
 int make_dir(Tree_Pos current)
 {
   Tree_Pos new_dir = NULL;
@@ -321,6 +324,7 @@ int make_dir(Tree_Pos current)
   return SUCCESS;
 }
 
+// inserts sorted by alphabet order
 Tree_Pos insert_sorted(Tree_Pos current, Tree_Pos new_dir)
 {
   if (NULL == current)
